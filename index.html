@@ -644,7 +644,7 @@ body.modal-open { overflow: hidden; }
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px;
+  margin-bottom: 6px;
 }
 
 .day-budget-title {
@@ -656,59 +656,24 @@ body.modal-open { overflow: hidden; }
   font-weight: 600;
 }
 
-.day-budget-status {
+.day-budget-count {
   font-family: 'Helvetica Neue', sans-serif;
   font-size: 11px;
-  font-weight: 700;
+  font-weight: 600;
+  color: var(--c-ink-faint);
 }
-
-.day-budget-status.success { color: var(--c-success); }
-.day-budget-status.warning { color: var(--c-warning); }
-.day-budget-status.danger { color: var(--c-danger); }
 
 .day-budget-numbers {
   display: flex;
-  justify-content: space-between;
   align-items: baseline;
-  margin-bottom: 8px;
 }
 
 .day-budget-actual {
   font-family: 'Helvetica Neue', sans-serif;
   font-size: 22px;
   font-weight: 700;
-  color: var(--c-ink);
+  color: var(--c-gold);
 }
-
-.day-budget-divider {
-  color: var(--c-ink-faint);
-  font-family: 'Helvetica Neue', sans-serif;
-  font-size: 16px;
-}
-
-.day-budget-estimate {
-  font-family: 'Helvetica Neue', sans-serif;
-  font-size: 14px;
-  color: var(--c-ink-faint);
-}
-
-.day-budget-progress-bar {
-  width: 100%;
-  height: 4px;
-  background: var(--c-line);
-  border-radius: 999px;
-  overflow: hidden;
-}
-
-.day-budget-progress-fill {
-  height: 100%;
-  border-radius: 999px;
-  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-  background: var(--c-success);
-}
-
-.day-budget-progress-fill.warning { background: var(--c-warning); }
-.day-budget-progress-fill.danger { background: var(--c-danger); }
 
 /* ========== TIMELINE ========== */
 .timeline { padding: 8px 20px 24px; }
@@ -4249,22 +4214,30 @@ function renderDaySection(d) {
         </div>
       ` : ''}
 
-      <div class="day-budget-bar">
-        <div class="day-budget-row">
-          <div class="day-budget-title">${t('budget.dayTitle')}</div>
-          <div class="day-budget-status ${budgetStatus.class}">${budgetStatus.text}</div>
-        </div>
-        <div class="day-budget-numbers">
-          <div>
-            <span class="day-budget-actual">${formatCurrency(budget.actual)}</span>
-            <span class="day-budget-divider"> / </span>
-            <span class="day-budget-estimate">${formatCurrency(budget.estimate)}</span>
+      ${(() => {
+        // 計算當日花費
+        let dayTotalTWD = 0;
+        let dayExpenseCount = 0;
+        d.timeline.filter(t => t.spotId).forEach(t => {
+          const expenses = userData[t.spotId]?.expenses || [];
+          dayExpenseCount += expenses.length;
+          expenses.forEach(exp => {
+            dayTotalTWD += convertToTWD(exp.amount, exp.currency);
+          });
+        });
+
+        return `
+          <div class="day-budget-bar">
+            <div class="day-budget-row">
+              <div class="day-budget-title">當日總花費</div>
+              <div class="day-budget-count">${dayExpenseCount > 0 ? dayExpenseCount + ' 筆紀錄' : '尚未記錄'}</div>
+            </div>
+            <div class="day-budget-numbers">
+              <span class="day-budget-actual">NT$ ${Math.round(dayTotalTWD).toLocaleString()}</span>
+            </div>
           </div>
-        </div>
-        <div class="day-budget-progress-bar">
-          <div class="day-budget-progress-fill ${budgetFillClass}" style="width: ${budgetPct}%"></div>
-        </div>
-      </div>
+        `;
+      })()}
 
       <div class="day-header">
         <div class="day-num-large">${d.day}<sup>${d.date}</sup></div>
