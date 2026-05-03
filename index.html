@@ -1,0 +1,5040 @@
+<!DOCTYPE html>
+<html lang="zh-TW" id="htmlRoot">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="東京 9 天">
+<meta name="theme-color" content="#1a1a2e">
+<meta name="description" content="東京 9 天行程互動 App - 含天氣、預算、進度、地圖">
+<title data-i18n="app.title">東京 9 天行程 ｜ 旅遊管家 App</title>
+
+<!-- PWA Manifest (inline) -->
+<link rel="manifest" href='data:application/manifest+json,{"name":"東京 9 天行程","short_name":"東京 9 天","start_url":".","display":"standalone","background_color":"%23fafaf7","theme_color":"%231a1a2e","icons":[{"src":"data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 192 192%22%3E%3Crect width=%22192%22 height=%22192%22 fill=%22%231a1a2e%22 rx=%2832%22/%3E%3Ctext x=%2296%22 y=%22120%22 font-size=%2280%22 text-anchor=%22middle%22 fill=%22white%22%3E🗼%3C/text%3E%3C/svg%3E","sizes":"192x192","type":"image/svg+xml"}]}'>
+
+<!-- Apple Touch Icon -->
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' fill='%231a1a2e' rx='40'/%3E%3Ctext x='90' y='115' font-size='80' text-anchor='middle' fill='white'%3E🗼%3C/text%3E%3C/svg%3E">
+
+<!-- Leaflet 地圖 CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+
+<style>
+:root {
+  --c-bg: #fafaf7;
+  --c-bg-elev: #ffffff;
+  --c-ink: #1a1a2e;
+  --c-ink-soft: #4a4a6a;
+  --c-ink-faint: #8a8aa0;
+  --c-line: #ebebe3;
+  --c-accent: #c8553d;
+  --c-accent-soft: #f4d6c8;
+  --c-gold: #b8860b;
+  --c-success: #52b788;
+  --c-warning: #f4a261;
+  --c-danger: #e76f51;
+  --c-fuji: #8b9dc3;
+  --c-emergency: #d62828;
+  --c-day-1: #ffd6cc; --c-day-2: #ffbeb0; --c-day-3: #d4c5e0;
+  --c-day-4: #c8e0c8; --c-day-5: #ffd9b8; --c-day-6: #b8dde8;
+  --c-day-7: #ffc89a; --c-day-8: #e8c8d8; --c-day-9: #e0e0d8;
+  --shadow-1: 0 1px 2px rgba(26,26,46,0.04), 0 4px 12px rgba(26,26,46,0.04);
+  --shadow-2: 0 4px 16px rgba(26,26,46,0.08), 0 12px 32px rgba(26,26,46,0.06);
+  --shadow-3: 0 16px 48px rgba(26,26,46,0.16);
+  --r-md: 14px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Noto Serif TC', 'Songti TC', 'PingFang TC', serif;
+  background: var(--c-bg);
+  color: var(--c-ink);
+  line-height: 1.6;
+  font-size: 15px;
+  letter-spacing: 0.01em;
+  overflow-x: hidden;
+  padding-bottom: 80px;
+}
+
+body.modal-open { overflow: hidden; }
+
+/* ========== HERO ========== */
+.hero {
+  position: relative;
+  padding: 32px 20px 24px;
+  background: linear-gradient(180deg, #1a1a2e 0%, #2d2d4a 100%);
+  color: #fafaf7;
+  overflow: hidden;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -50px;
+  right: -50px;
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(200,85,61,0.3) 0%, transparent 70%);
+}
+
+.hero-eyebrow {
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.6);
+  margin-bottom: 12px;
+}
+
+.hero h1 { font-size: 28px; line-height: 1.2; margin-bottom: 8px; font-weight: 600; }
+.hero-dates { font-family: 'Helvetica Neue', sans-serif; font-size: 13px; color: rgba(255,255,255,0.7); }
+
+/* COUNTDOWN (NEW - 批次 2) */
+.hero-countdown {
+  margin-top: 16px;
+  padding: 12px 16px;
+  background: rgba(200,85,61,0.15);
+  border-radius: 12px;
+  border: 1px solid rgba(200,85,61,0.3);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.hero-countdown-icon {
+  font-size: 22px;
+  flex-shrink: 0;
+}
+
+.hero-countdown-content {
+  flex: 1;
+}
+
+.hero-countdown-label {
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.7);
+  margin-bottom: 2px;
+}
+
+.hero-countdown-value {
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: white;
+}
+
+.hero-countdown-value strong {
+  font-size: 22px;
+  font-weight: 700;
+  color: #f4a261;
+  margin-right: 4px;
+}
+
+/* PROGRESS BAR */
+.hero-progress {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255,255,255,0.15);
+}
+
+.hero-progress-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.hero-progress-label {
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.7);
+}
+
+.hero-progress-count {
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.hero-progress-count .total {
+  font-size: 12px;
+  font-weight: 400;
+  color: rgba(255,255,255,0.5);
+}
+
+.hero-progress-bar {
+  width: 100%;
+  height: 6px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.hero-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--c-accent) 0%, #f4a261 100%);
+  border-radius: 999px;
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* BUDGET ROW */
+.hero-budget {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255,255,255,0.15);
+}
+
+.hero-budget-cell { text-align: left; }
+
+.hero-budget-label {
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.5);
+  margin-bottom: 4px;
+}
+
+.hero-budget-value {
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.hero-budget-value.success { color: #95d5b2; }
+.hero-budget-value.warning { color: #f4a261; }
+.hero-budget-value.danger { color: #f7a6a6; }
+
+/* TOOL ROW */
+.hero-tools {
+  margin-top: 16px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.tool-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 7px 12px;
+  background: rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.85);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 999px;
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tool-button:hover { background: rgba(255,255,255,0.2); }
+.tool-button.danger { color: rgba(247,166,166,0.8); }
+
+/* ========== TABS ========== */
+.day-tabs-wrap {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(250,250,247,0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--c-line);
+}
+
+.day-tabs {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  padding: 12px 16px;
+  gap: 8px;
+  scrollbar-width: none;
+}
+
+.day-tabs::-webkit-scrollbar { display: none; }
+
+.day-tab {
+  flex-shrink: 0;
+  scroll-snap-align: start;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: var(--c-bg-elev);
+  border: 1px solid var(--c-line);
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 12px;
+  color: var(--c-ink-soft);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 64px;
+  position: relative;
+}
+
+.day-tab.active {
+  background: var(--c-ink);
+  color: var(--c-bg);
+  border-color: var(--c-ink);
+}
+
+.day-tab-num { font-size: 16px; font-weight: 700; line-height: 1; }
+.day-tab-date { font-size: 9px; margin-top: 2px; opacity: 0.7; }
+
+.day-tab-weather {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--c-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  border: 1px solid var(--c-line);
+}
+
+.day-tab-progress {
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--c-success);
+  display: none;
+}
+
+.day-tab-progress.partial { background: var(--c-warning); display: block; }
+.day-tab-progress.complete { background: var(--c-success); display: block; }
+
+.day-section { display: none; animation: fadeIn 0.3s ease; }
+.day-section.active { display: block; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ========== ROUTE MAP (NEW - 批次 2) ========== */
+.route-map-wrap {
+  margin: 16px 16px 0;
+  background: var(--c-bg-elev);
+  border-radius: var(--r-md);
+  border: 1px solid var(--c-line);
+  overflow: hidden;
+  box-shadow: var(--shadow-1);
+}
+
+.route-map-header {
+  padding: 14px 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--c-line);
+}
+
+.route-map-title {
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--c-ink);
+}
+
+.route-map-count {
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 10px;
+  color: var(--c-ink-faint);
+}
+
+.route-map-container {
+  width: 100%;
+  height: 280px;
+  background: #f5f5f0;
+  position: relative;
+}
+
+.route-map-loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--c-ink-faint);
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+}
+
+/* Custom Leaflet marker style */
+.custom-marker {
+  background: var(--c-accent);
+  color: white;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  border: 2px solid white;
+}
+
+.custom-marker.completed {
+  background: var(--c-success);
+}
+
+.custom-marker.start { background: var(--c-ink); }
+.custom-marker.end { background: var(--c-gold); }
+
+/* Map popup */
+.leaflet-popup-content {
+  margin: 8px 12px !important;
+  font-family: 'Noto Serif TC', serif !important;
+}
+
+.map-popup-title {
+  font-weight: 700;
+  font-size: 13px;
+  margin-bottom: 2px;
+}
+
+.map-popup-time {
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 10px;
+  color: var(--c-accent);
+  letter-spacing: 0.05em;
+}
+
+/* ========== WEATHER WIDGET ========== */
+.weather-widget {
+  margin: 16px 16px 0;
+  background: linear-gradient(135deg, #fff 0%, #f5f9fc 100%);
+  border-radius: var(--r-md);
+  border: 1px solid var(--c-line);
+  overflow: hidden;
+  box-shadow: var(--shadow-1);
+}
+
+.weather-loading {
+  padding: 20px;
+  text-align: center;
+  color: var(--c-ink-faint);
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+}
+
+.weather-content { padding: 16px 18px; }
+
+.weather-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 14px;
+}
+
+.weather-location {
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--c-ink-faint);
+  margin-bottom: 4px;
+}
+
+.weather-summary { font-size: 15px; font-weight: 600; }
+.weather-icon-large { font-size: 36px; line-height: 1; }
+
+.weather-temps {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.weather-temp-max {
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 32px;
+  font-weight: 200;
+  color: var(--c-accent);
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.weather-temp-min { font-family: 'Helvetica Neue', sans-serif; font-size: 18px; color: var(--c-ink-faint); }
+.weather-temp-unit { font-size: 14px; color: var(--c-ink-faint); }
+
+.weather-stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--c-line);
+}
+
+.weather-stat { text-align: center; }
+.weather-stat-icon { font-size: 14px; margin-bottom: 2px; }
+.weather-stat-value { font-family: 'Helvetica Neue', sans-serif; font-size: 14px; font-weight: 600; }
+.weather-stat-label { font-size: 9px; color: var(--c-ink-faint); letter-spacing: 0.1em; text-transform: uppercase; font-family: 'Helvetica Neue', sans-serif; margin-top: 1px; }
+
+/* OUTFIT SUGGESTION (NEW - 批次 2) */
+.weather-outfit {
+  margin-top: 12px;
+  padding: 12px 14px;
+  background: linear-gradient(135deg, #fef9ed 0%, #fff5e0 100%);
+  border-radius: 10px;
+  border: 1px solid #f5e1a0;
+}
+
+.weather-outfit-title {
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--c-warning);
+  margin-bottom: 8px;
+}
+
+.weather-outfit-content {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.outfit-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 4px 9px;
+  background: white;
+  border: 1px solid #f5e1a0;
+  border-radius: 999px;
+  font-size: 11px;
+  color: var(--c-ink);
+  font-family: 'Helvetica Neue', sans-serif;
+  font-weight: 500;
+}
+
+.outfit-tag-icon { font-size: 12px; }
+
+.weather-fuji {
+  margin-top: 12px;
+  padding: 12px;
+  background: linear-gradient(135deg, #f0f4f8 0%, #e6ecf5 100%);
+  border-radius: 10px;
+  border: 1px solid #d6dde8;
+}
+
+.weather-fuji-title { font-family: 'Helvetica Neue', sans-serif; font-size: 9px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--c-fuji); margin-bottom: 6px; }
+.weather-fuji-status { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+.weather-fuji-status.excellent { color: #2d6a4f; }
+.weather-fuji-status.good { color: #52b788; }
+.weather-fuji-status.fair { color: #f4a261; }
+.weather-fuji-status.poor { color: #e76f51; }
+.weather-fuji-detail { font-size: 11px; color: var(--c-ink-soft); line-height: 1.5; }
+
+.weather-future {
+  padding: 24px 20px;
+  text-align: center;
+  background: linear-gradient(135deg, #fff8e1 0%, #fffdf3 100%);
+}
+
+.weather-future-icon { font-size: 32px; margin-bottom: 8px; }
+.weather-future-title { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+.weather-future-detail { font-size: 11px; color: var(--c-ink-faint); line-height: 1.5; }
+
+/* ========== DAY HEADER ========== */
+.day-header {
+  padding: 24px 20px 20px;
+  position: relative;
+}
+
+.day-header::before {
+  content: '';
+  position: absolute;
+  left: 20px;
+  right: 20px;
+  bottom: 0;
+  height: 1px;
+  background: var(--c-line);
+}
+
+.day-num-large {
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 64px;
+  font-weight: 200;
+  letter-spacing: -0.04em;
+  line-height: 0.9;
+  display: inline-block;
+}
+
+.day-num-large sup {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  color: var(--c-ink-faint);
+  margin-left: 8px;
+  vertical-align: super;
+}
+
+.day-title {
+  font-size: 22px;
+  font-weight: 600;
+  margin-top: 8px;
+}
+
+.day-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.meta-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  background: var(--c-bg-elev);
+  border: 1px solid var(--c-line);
+  border-radius: 999px;
+  font-size: 11px;
+  color: var(--c-ink-soft);
+  font-family: 'Helvetica Neue', sans-serif;
+  letter-spacing: 0.05em;
+}
+
+.meta-chip.accent { background: var(--c-accent); color: white; border-color: var(--c-accent); }
+
+/* DAY BUDGET BAR */
+.day-budget-bar {
+  margin: 16px 16px 0;
+  padding: 14px 16px;
+  background: var(--c-bg-elev);
+  border-radius: var(--r-md);
+  border: 1px solid var(--c-line);
+  box-shadow: var(--shadow-1);
+}
+
+.day-budget-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.day-budget-title {
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--c-ink-faint);
+  font-weight: 600;
+}
+
+.day-budget-status {
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.day-budget-status.success { color: var(--c-success); }
+.day-budget-status.warning { color: var(--c-warning); }
+.day-budget-status.danger { color: var(--c-danger); }
+
+.day-budget-numbers {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 8px;
+}
+
+.day-budget-actual {
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--c-ink);
+}
+
+.day-budget-divider {
+  color: var(--c-ink-faint);
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 16px;
+}
+
+.day-budget-estimate {
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 14px;
+  color: var(--c-ink-faint);
+}
+
+.day-budget-progress-bar {
+  width: 100%;
+  height: 4px;
+  background: var(--c-line);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.day-budget-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  background: var(--c-success);
+}
+
+.day-budget-progress-fill.warning { background: var(--c-warning); }
+.day-budget-progress-fill.danger { background: var(--c-danger); }
+
+/* ========== TIMELINE ========== */
+.timeline { padding: 8px 20px 24px; }
+
+.timeline-item {
+  display: grid;
+  grid-template-columns: 56px 1fr;
+  gap: 12px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--c-line);
+}
+
+.timeline-item:last-child { border-bottom: none; }
+
+.time-col {
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--c-accent);
+  letter-spacing: 0.03em;
+  padding-top: 2px;
+}
+
+.time-col-sub { font-size: 10px; color: var(--c-ink-faint); display: block; margin-top: 2px; }
+
+.event-col { font-size: 14px; color: var(--c-ink); }
+
+.event-clickable {
+  cursor: pointer;
+  transition: transform 0.15s ease, opacity 0.3s ease;
+  display: grid;
+  grid-template-columns: 24px 1fr 64px;
+  gap: 8px;
+  align-items: center;
+  position: relative;
+}
+
+.event-clickable:active { transform: scale(0.98); }
+
+.event-checkbox {
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--c-line);
+  border-radius: 6px;
+  background: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.event-checkbox:hover { border-color: var(--c-accent); }
+
+.event-checkbox.checked {
+  background: var(--c-success);
+  border-color: var(--c-success);
+}
+
+.event-checkbox.checked::after {
+  content: '✓';
+  color: white;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.event-clickable.completed .event-text-block { opacity: 0.55; }
+
+.event-clickable.completed .event-title {
+  text-decoration: line-through;
+  text-decoration-color: var(--c-ink-faint);
+  text-decoration-thickness: 2px;
+}
+
+.event-clickable.completed .event-thumb {
+  filter: grayscale(60%);
+  opacity: 0.7;
+}
+
+.event-text-block { min-width: 0; transition: opacity 0.3s ease; }
+
+.event-thumb {
+  width: 64px;
+  height: 64px;
+  border-radius: 10px;
+  background: var(--c-line);
+  background-size: cover;
+  background-position: center;
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  transition: filter 0.3s ease, opacity 0.3s ease;
+}
+
+.event-thumb::after {
+  content: '›';
+  position: absolute;
+  bottom: 2px;
+  right: 5px;
+  color: white;
+  font-size: 16px;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+  font-weight: 600;
+}
+
+.event-thumb.no-image {
+  background: linear-gradient(135deg, var(--c-accent-soft), var(--c-line));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+}
+
+.event-title { font-weight: 600; margin-bottom: 4px; line-height: 1.4; }
+.event-detail { font-size: 12px; color: var(--c-ink-soft); line-height: 1.5; }
+
+.event-meta {
+  display: flex;
+  gap: 10px;
+  margin-top: 6px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.event-meta span {
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 10px;
+  color: var(--c-ink-faint);
+}
+
+.event-meta span.cost { color: var(--c-gold); font-weight: 600; }
+
+.event-rating-mini { font-size: 10px; color: var(--c-accent); letter-spacing: -1px; }
+
+.event-actual-cost {
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 10px;
+  color: var(--c-success);
+  font-weight: 700;
+  background: rgba(82, 183, 136, 0.1);
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+.event-has-note { font-size: 10px; color: var(--c-fuji); }
+
+.highlight-row {
+  background: linear-gradient(90deg, var(--c-accent-soft) 0%, transparent 100%);
+  margin-left: -20px;
+  padding-left: 20px;
+  padding-right: 12px;
+  border-left: 3px solid var(--c-accent);
+}
+
+.timeline-item.non-clickable .event-col {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+/* ========== OVERVIEW ========== */
+.overview-grid { display: grid; gap: 10px; padding: 16px; }
+
+.overview-card {
+  background: var(--c-bg-elev);
+  border-radius: var(--r-md);
+  padding: 16px;
+  display: grid;
+  grid-template-columns: 50px 1fr 36px auto;
+  gap: 12px;
+  align-items: center;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+  border: 1px solid var(--c-line);
+  position: relative;
+  overflow: hidden;
+}
+
+.overview-card:active { transform: scale(0.98); }
+
+.overview-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+}
+
+.overview-card[data-day="1"]::before { background: var(--c-day-1); }
+.overview-card[data-day="2"]::before { background: var(--c-day-2); }
+.overview-card[data-day="3"]::before { background: var(--c-day-3); }
+.overview-card[data-day="4"]::before { background: var(--c-day-4); }
+.overview-card[data-day="5"]::before { background: var(--c-day-5); }
+.overview-card[data-day="6"]::before { background: var(--c-day-6); }
+.overview-card[data-day="7"]::before { background: var(--c-day-7); }
+.overview-card[data-day="8"]::before { background: var(--c-day-8); }
+.overview-card[data-day="9"]::before { background: var(--c-day-9); }
+
+.overview-day-num { font-family: 'Helvetica Neue', sans-serif; font-size: 32px; font-weight: 200; line-height: 1; }
+.overview-content h3 { font-size: 15px; font-weight: 600; margin-bottom: 2px; }
+.overview-content p { font-size: 11px; color: var(--c-ink-faint); font-family: 'Helvetica Neue', sans-serif; }
+
+.overview-day-progress {
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.overview-day-progress-bar {
+  flex: 1;
+  height: 3px;
+  background: var(--c-line);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.overview-day-progress-fill {
+  height: 100%;
+  background: var(--c-success);
+  border-radius: 999px;
+  transition: width 0.5s ease;
+}
+
+.overview-day-progress-text {
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 9px;
+  color: var(--c-ink-faint);
+  font-weight: 600;
+}
+
+.overview-weather { text-align: center; font-size: 22px; line-height: 1; }
+.overview-weather-temp { font-family: 'Helvetica Neue', sans-serif; font-size: 9px; color: var(--c-ink-faint); margin-top: 2px; }
+.overview-arrow { color: var(--c-ink-faint); font-size: 18px; }
+
+.section-title {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--c-ink-faint);
+  padding: 24px 20px 8px;
+  font-family: 'Helvetica Neue', sans-serif;
+}
+
+.timeline-group { margin-bottom: 12px; }
+
+.timeline-group-title {
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--c-accent);
+  padding: 16px 0 6px;
+  border-bottom: 2px solid var(--c-accent);
+  margin-bottom: 8px;
+}
+
+.info-section { margin: 8px 16px 24px; }
+
+.info-card {
+  background: var(--c-bg-elev);
+  border-radius: var(--r-md);
+  padding: 18px;
+  margin-bottom: 12px;
+  box-shadow: var(--shadow-1);
+  border: 1px solid var(--c-line);
+}
+
+.info-card.warning { background: linear-gradient(180deg, #fff8e1 0%, #fffdf3 100%); border-color: #f5e1a0; }
+.info-card.tip { background: linear-gradient(180deg, #e8f4f8 0%, #f4fafc 100%); border-color: #b8dde8; }
+.info-card-title { font-size: 13px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+.info-card ul { list-style: none; padding: 0; }
+.info-card li { font-size: 12px; line-height: 1.6; color: var(--c-ink-soft); padding: 4px 0 4px 14px; position: relative; }
+.info-card li::before { content: '·'; position: absolute; left: 4px; color: var(--c-accent); font-weight: 700; font-size: 16px; line-height: 1; }
+
+.fab {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 44px;
+  height: 44px;
+  background: var(--c-ink);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  font-size: 18px;
+  cursor: pointer;
+  box-shadow: var(--shadow-2);
+  z-index: 200;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.fab.visible { opacity: 1; pointer-events: auto; }
+
+.footer {
+  text-align: center;
+  padding: 32px 20px;
+  font-size: 10px;
+  color: var(--c-ink-faint);
+  letter-spacing: 0.1em;
+  font-family: 'Helvetica Neue', sans-serif;
+  text-transform: uppercase;
+}
+
+/* ========== EMERGENCY PAGE (NEW - 批次 3) ========== */
+.emergency-section { padding: 16px; }
+
+.emergency-banner {
+  background: linear-gradient(135deg, var(--c-emergency) 0%, #ef476f 100%);
+  color: white;
+  padding: 20px;
+  border-radius: var(--r-md);
+  text-align: center;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow-2);
+}
+
+.emergency-banner-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.emergency-banner-sub {
+  font-size: 12px;
+  opacity: 0.9;
+  font-family: 'Helvetica Neue', sans-serif;
+}
+
+.emergency-card {
+  background: var(--c-bg-elev);
+  border-radius: var(--r-md);
+  padding: 0;
+  margin-bottom: 12px;
+  box-shadow: var(--shadow-1);
+  border: 1px solid var(--c-line);
+  overflow: hidden;
+}
+
+.emergency-card-header {
+  padding: 14px 16px;
+  background: linear-gradient(135deg, var(--c-ink) 0%, #2d2d4a 100%);
+  color: white;
+}
+
+.emergency-card-title {
+  font-size: 14px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.emergency-card-icon { font-size: 18px; }
+
+.emergency-list {
+  padding: 0;
+}
+
+.emergency-item {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--c-line);
+  align-items: center;
+}
+
+.emergency-item:last-child { border-bottom: none; }
+
+.emergency-item-content {}
+
+.emergency-item-name {
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.emergency-item-detail {
+  font-size: 11px;
+  color: var(--c-ink-faint);
+  font-family: 'Helvetica Neue', sans-serif;
+}
+
+.emergency-call-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 14px;
+  background: var(--c-emergency);
+  color: white;
+  border-radius: 999px;
+  text-decoration: none;
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.emergency-call-btn:active { transform: scale(0.95); }
+
+.emergency-info-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 14px;
+  background: var(--c-ink);
+  color: white;
+  border-radius: 999px;
+  text-decoration: none;
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* ========== PACKING LIST (NEW - 批次 3) ========== */
+.packing-section { padding: 16px; }
+
+.packing-stats {
+  background: linear-gradient(135deg, var(--c-ink) 0%, #2d2d4a 100%);
+  color: white;
+  padding: 18px 20px;
+  border-radius: var(--r-md);
+  margin-bottom: 16px;
+}
+
+.packing-stats-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.packing-stats-label {
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.7);
+}
+
+.packing-stats-count {
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.packing-stats-bar {
+  width: 100%;
+  height: 6px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.packing-stats-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--c-success) 0%, #95d5b2 100%);
+  border-radius: 999px;
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.packing-category {
+  background: var(--c-bg-elev);
+  border-radius: var(--r-md);
+  padding: 16px 18px;
+  margin-bottom: 12px;
+  border: 1px solid var(--c-line);
+  box-shadow: var(--shadow-1);
+}
+
+.packing-category-title {
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.packing-category-count {
+  margin-left: auto;
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 10px;
+  color: var(--c-ink-faint);
+  font-weight: 600;
+}
+
+.packing-item {
+  display: grid;
+  grid-template-columns: 24px 1fr;
+  gap: 10px;
+  padding: 8px 0;
+  align-items: center;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.packing-item:hover { background: rgba(0,0,0,0.02); }
+
+.packing-checkbox {
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--c-line);
+  border-radius: 6px;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.packing-item.checked .packing-checkbox {
+  background: var(--c-success);
+  border-color: var(--c-success);
+}
+
+.packing-item.checked .packing-checkbox::after {
+  content: '✓';
+  color: white;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.packing-item-text {
+  font-size: 13px;
+  color: var(--c-ink);
+}
+
+.packing-item.checked .packing-item-text {
+  text-decoration: line-through;
+  color: var(--c-ink-faint);
+}
+
+.packing-item-note {
+  font-size: 11px;
+  color: var(--c-ink-faint);
+  margin-top: 2px;
+  font-family: 'Helvetica Neue', sans-serif;
+}
+
+/* ========== LANGUAGE SWITCHER (NEW - 批次 3) ========== */
+.lang-switcher {
+  display: inline-flex;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 999px;
+  padding: 2px;
+  gap: 2px;
+}
+
+.lang-btn {
+  padding: 5px 10px;
+  background: transparent;
+  color: rgba(255,255,255,0.6);
+  border: none;
+  border-radius: 999px;
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.lang-btn.active {
+  background: rgba(255,255,255,0.95);
+  color: var(--c-ink);
+  font-weight: 700;
+}
+
+/* ========== MODAL ========== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(26,26,46,0.6);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: none;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.modal-overlay.active { display: flex; animation: overlayFade 0.25s ease; }
+
+@keyframes overlayFade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal {
+  background: var(--c-bg);
+  width: 100%;
+  max-width: 520px;
+  max-height: 92vh;
+  border-radius: 24px 24px 0 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  animation: modalSlide 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+  box-shadow: var(--shadow-3);
+}
+
+@keyframes modalSlide {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.modal-close {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: rgba(250,250,247,0.95);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  justify-content: flex-end;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--c-line);
+}
+
+.modal-close-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--c-line);
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  color: var(--c-ink-soft);
+}
+
+.modal-content { padding: 0 0 32px; }
+
+.modal-hero-image {
+  position: relative;
+  width: 100%;
+  height: 240px;
+  background: linear-gradient(135deg, var(--c-accent-soft), var(--c-line));
+  background-size: cover;
+  background-position: center;
+  overflow: hidden;
+}
+
+.modal-hero-image::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 0%, transparent 40%, rgba(26,26,46,0.85) 100%);
+}
+
+.modal-hero-overlay { position: absolute; bottom: 20px; left: 24px; right: 24px; z-index: 2; color: white; }
+
+.modal-tag {
+  display: inline-block;
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 9px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  font-weight: 700;
+  margin-bottom: 8px;
+  padding: 4px 10px;
+  background: rgba(200,85,61,0.85);
+  border-radius: 999px;
+  backdrop-filter: blur(8px);
+}
+
+.modal-title { font-size: 26px; font-weight: 600; line-height: 1.2; margin-bottom: 4px; text-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+.modal-subtitle { font-size: 13px; color: rgba(255,255,255,0.85); font-family: 'Helvetica Neue', sans-serif; }
+
+.modal-quick {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--c-line);
+  margin: 16px 24px 0;
+  border-radius: var(--r-md);
+  overflow: hidden;
+  border: 1px solid var(--c-line);
+}
+
+.modal-quick-item { background: var(--c-bg-elev); padding: 10px 12px; text-align: center; }
+.modal-quick-label { font-family: 'Helvetica Neue', sans-serif; font-size: 9px; color: var(--c-ink-faint); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 4px; }
+.modal-quick-value { font-size: 13px; font-weight: 600; }
+
+.modal-section { padding: 20px 24px; border-bottom: 1px solid var(--c-line); }
+.modal-section:last-child { border-bottom: none; }
+
+.modal-section-title {
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--c-ink-faint);
+  margin-bottom: 12px;
+}
+
+.modal-section p { font-size: 14px; line-height: 1.7; color: var(--c-ink-soft); margin-bottom: 12px; }
+.modal-section ul { list-style: none; padding: 0; }
+.modal-section li { font-size: 13px; line-height: 1.7; color: var(--c-ink-soft); padding: 4px 0 4px 16px; position: relative; }
+.modal-section li::before { content: ''; position: absolute; left: 0; top: 14px; width: 6px; height: 1px; background: var(--c-accent); }
+.modal-section li strong { color: var(--c-ink); font-weight: 600; }
+
+.modal-map { width: 100%; height: 240px; border: none; display: block; }
+.modal-map-wrapper { border-radius: var(--r-md); overflow: hidden; border: 1px solid var(--c-line); margin-bottom: 12px; }
+
+.modal-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  background: var(--c-ink);
+  color: white;
+  border-radius: 999px;
+  text-decoration: none;
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  margin-right: 8px;
+  margin-bottom: 8px;
+}
+
+.modal-link.accent { background: var(--c-accent); }
+
+.modal-actions {
+  background: linear-gradient(180deg, #f8f9fc 0%, #fff 100%);
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--c-line);
+}
+
+.modal-action-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.action-button {
+  padding: 12px;
+  background: white;
+  border: 1px solid var(--c-line);
+  border-radius: var(--r-md);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s ease;
+  font-family: 'Helvetica Neue', sans-serif;
+}
+
+.action-button:active { transform: scale(0.97); }
+
+.action-button.completed {
+  background: linear-gradient(135deg, #d8f3dc 0%, #b7e4c7 100%);
+  border-color: var(--c-success);
+}
+
+.action-button-icon { font-size: 20px; }
+.action-button-label { font-size: 11px; font-weight: 600; color: var(--c-ink); letter-spacing: 0.05em; }
+.action-button.completed .action-button-label { color: #2d6a4f; }
+
+.modal-rating { margin-bottom: 16px; }
+
+.modal-rating-label, .modal-cost-label, .modal-note-label {
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--c-ink-faint);
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.modal-rating-stars { display: flex; gap: 4px; }
+
+.modal-rating-star {
+  font-size: 28px;
+  color: var(--c-line);
+  cursor: pointer;
+  transition: transform 0.15s ease, color 0.2s ease;
+  user-select: none;
+}
+
+.modal-rating-star:hover { transform: scale(1.15); }
+.modal-rating-star.active { color: var(--c-accent); }
+
+.modal-cost { margin-bottom: 16px; }
+
+.modal-cost-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: white;
+  border: 1px solid var(--c-line);
+  border-radius: 10px;
+  padding: 10px 14px;
+}
+
+.modal-cost-input-wrapper:focus-within {
+  border-color: var(--c-accent);
+  box-shadow: 0 0 0 3px rgba(200, 85, 61, 0.1);
+}
+
+.modal-cost-currency { font-family: 'Helvetica Neue', sans-serif; font-weight: 700; color: var(--c-gold); font-size: 16px; }
+
+.modal-cost-input {
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  flex: 1;
+  width: 100%;
+  color: var(--c-ink);
+}
+
+.modal-cost-estimate {
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 11px;
+  color: var(--c-ink-faint);
+  margin-top: 6px;
+  text-align: right;
+}
+
+.modal-note { margin-bottom: 0; }
+
+.modal-note-textarea {
+  width: 100%;
+  min-height: 70px;
+  padding: 12px 14px;
+  border: 1px solid var(--c-line);
+  border-radius: 10px;
+  background: white;
+  font-family: 'Noto Serif TC', serif;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--c-ink);
+  resize: vertical;
+  outline: none;
+}
+
+.modal-note-textarea:focus {
+  border-color: var(--c-accent);
+  box-shadow: 0 0 0 3px rgba(200, 85, 61, 0.1);
+}
+
+.image-credit { position: absolute; bottom: 4px; right: 8px; font-family: 'Helvetica Neue', sans-serif; font-size: 9px; color: rgba(255,255,255,0.5); z-index: 3; }
+
+.modal-warning {
+  background: linear-gradient(180deg, #fff8e1 0%, #fffdf3 100%);
+  border: 1px solid #f5e1a0;
+  border-radius: var(--r-md);
+  padding: 14px 16px;
+  margin-top: 0;
+}
+.modal-warning .modal-section-title {
+  color: var(--c-gold);
+  margin-bottom: 8px;
+}
+.modal-warning li { font-size: 12px; padding-left: 16px; }
+.modal-warning li::before { background: var(--c-gold) !important; }
+
+/* ========== EXPENSE TRACKING v6 (多筆記帳) ========== */
+
+/* 共用 */
+.modal-select {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid var(--c-line);
+  border-radius: 8px;
+  background: white;
+  font-family: 'Noto Serif TC', serif;
+  font-size: 13px;
+  color: var(--c-ink);
+  outline: none;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%238a8aa0' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 10px;
+  padding-right: 32px;
+}
+
+.modal-select:focus {
+  border-color: var(--c-accent);
+  box-shadow: 0 0 0 3px rgba(200, 85, 61, 0.1);
+}
+
+/* 花費紀錄列表 */
+.expense-list {
+  margin-bottom: 16px;
+}
+
+.expense-list-empty {
+  padding: 14px 16px;
+  text-align: center;
+  color: var(--c-ink-faint);
+  font-size: 12px;
+  background: var(--c-line);
+  border-radius: 10px;
+  font-family: 'Helvetica Neue', sans-serif;
+  letter-spacing: 0.05em;
+}
+
+.expense-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 8px;
+  align-items: center;
+  padding: 10px 12px;
+  background: white;
+  border: 1px solid var(--c-line);
+  border-radius: 10px;
+  margin-bottom: 6px;
+}
+
+.expense-row-icons {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+}
+
+.expense-row-content {
+  min-width: 0;
+}
+
+.expense-row-amount {
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--c-gold);
+}
+
+.expense-row-twd {
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 10px;
+  color: var(--c-ink-faint);
+  margin-left: 4px;
+}
+
+.expense-row-note {
+  font-size: 11px;
+  color: var(--c-ink-soft);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.expense-row-delete {
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  color: var(--c-ink-faint);
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.expense-row-delete:hover {
+  background: var(--c-danger);
+  color: white;
+}
+
+.expense-list-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  background: linear-gradient(135deg, #fef9ed 0%, #fff5e0 100%);
+  border-radius: 10px;
+  border: 1px solid #f5e1a0;
+  margin-top: 6px;
+}
+
+.expense-list-summary-label {
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--c-warning);
+  font-weight: 700;
+}
+
+.expense-list-summary-amount {
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--c-ink);
+}
+
+.expense-list-summary-twd {
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 11px;
+  color: var(--c-success);
+  font-weight: 600;
+  margin-left: 6px;
+}
+
+/* 新增表單 */
+.expense-add-form {
+  background: linear-gradient(180deg, #f8f9fc 0%, #f0f2f8 100%);
+  padding: 14px 16px;
+  border-radius: var(--r-md);
+  border: 1px dashed var(--c-line);
+}
+
+.expense-add-form-title {
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--c-ink-faint);
+  margin-bottom: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.expense-add-currency-amount {
+  display: grid;
+  grid-template-columns: 100px 1fr;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.expense-add-twd-display {
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 11px;
+  color: var(--c-success);
+  margin-bottom: 10px;
+  font-weight: 600;
+  height: 14px;
+}
+
+.expense-add-twd-display.empty {
+  color: var(--c-ink-faint);
+  font-weight: 400;
+}
+
+.expense-add-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.expense-add-note-input {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid var(--c-line);
+  border-radius: 8px;
+  background: white;
+  font-family: 'Noto Serif TC', serif;
+  font-size: 13px;
+  color: var(--c-ink);
+  outline: none;
+  margin-bottom: 12px;
+}
+
+.expense-add-note-input:focus {
+  border-color: var(--c-accent);
+  box-shadow: 0 0 0 3px rgba(200, 85, 61, 0.1);
+}
+
+.expense-add-button {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, var(--c-accent) 0%, #d96b54 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.expense-add-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(200, 85, 61, 0.3);
+}
+
+.expense-add-button:active {
+  transform: scale(0.98);
+}
+
+.expense-add-button:disabled {
+  background: var(--c-line);
+  color: var(--c-ink-faint);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.expense-cost-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: white;
+  border: 1px solid var(--c-line);
+  border-radius: 8px;
+  padding: 9px 12px;
+}
+
+.expense-cost-input-wrapper:focus-within {
+  border-color: var(--c-accent);
+  box-shadow: 0 0 0 3px rgba(200, 85, 61, 0.1);
+}
+
+.expense-cost-currency-sym {
+  font-family: 'Helvetica Neue', sans-serif;
+  font-weight: 700;
+  color: var(--c-gold);
+  font-size: 14px;
+}
+
+.expense-cost-input {
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  flex: 1;
+  width: 100%;
+  color: var(--c-ink);
+}
+
+/* 匯率設定 */
+.rate-settings-panel {
+  margin: 16px 16px 0;
+  padding: 16px 18px;
+  background: linear-gradient(135deg, #fef9ed 0%, #fff5e0 100%);
+  border-radius: var(--r-md);
+  border: 1px solid #f5e1a0;
+  display: none;
+}
+
+.rate-settings-panel.show {
+  display: block;
+}
+
+.rate-settings-title {
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--c-warning);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.rate-settings-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.rate-input-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.rate-input-label {
+  font-size: 11px;
+  color: var(--c-ink-soft);
+  margin-bottom: 4px;
+}
+
+.rate-input-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: white;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--c-line);
+}
+
+.rate-input-row input {
+  border: none;
+  outline: none;
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  width: 100%;
+  background: transparent;
+}
+
+.rate-input-row span {
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 12px;
+  color: var(--c-ink-faint);
+}
+
+.rate-update-time {
+  font-size: 10px;
+  color: var(--c-ink-faint);
+  margin-top: 8px;
+  font-family: 'Helvetica Neue', sans-serif;
+}
+
+/* Timeline 上的多筆顯示 */
+.event-expense-summary {
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 10px;
+  color: var(--c-success);
+  font-weight: 700;
+  background: rgba(82, 183, 136, 0.1);
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+.event-expense-count {
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 9px;
+  color: var(--c-ink-faint);
+  margin-left: 2px;
+}
+
+/* Hero 各人花費 */
+.hero-payer-summary {
+  margin-top: 12px;
+  padding: 12px 14px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.hero-payer-summary-title {
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.6);
+  margin-bottom: 8px;
+}
+
+.hero-payer-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.hero-payer-cell {
+  text-align: center;
+}
+
+.hero-payer-cell-name {
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 9px;
+  color: rgba(255,255,255,0.6);
+  margin-bottom: 2px;
+}
+
+.hero-payer-cell-amount {
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.95);
+}
+
+
+/* ========== SHEETS INTEGRATION (NEW v7) ========== */
+.sheets-section {
+  padding: 16px;
+}
+
+.sheets-banner {
+  background: linear-gradient(135deg, #34a853 0%, #4caf50 100%);
+  color: white;
+  padding: 20px;
+  border-radius: var(--r-md);
+  text-align: center;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow-2);
+}
+
+.sheets-banner-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.sheets-banner-sub {
+  font-size: 12px;
+  opacity: 0.9;
+  font-family: 'Helvetica Neue', sans-serif;
+}
+
+.sheets-card {
+  background: var(--c-bg-elev);
+  border-radius: var(--r-md);
+  padding: 18px;
+  margin-bottom: 12px;
+  box-shadow: var(--shadow-1);
+  border: 1px solid var(--c-line);
+}
+
+.sheets-card-title {
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sheets-card-desc {
+  font-size: 12px;
+  color: var(--c-ink-soft);
+  line-height: 1.6;
+  margin-bottom: 14px;
+}
+
+.sheets-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 18px;
+  background: var(--c-ink);
+  color: white;
+  border: none;
+  border-radius: 999px;
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+.sheets-action-btn:hover { transform: translateY(-1px); box-shadow: var(--shadow-2); }
+.sheets-action-btn:active { transform: scale(0.98); }
+.sheets-action-btn.green { background: #34a853; }
+.sheets-action-btn.blue { background: #1a73e8; }
+.sheets-action-btn.outline {
+  background: transparent;
+  color: var(--c-ink);
+  border: 1px solid var(--c-line);
+}
+
+.sheets-info {
+  background: linear-gradient(180deg, #e8f0fe 0%, #f4f8fd 100%);
+  border-left: 3px solid #1a73e8;
+  padding: 12px 14px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+.sheets-info-title {
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #1a73e8;
+  margin-bottom: 6px;
+}
+
+.sheets-info-text {
+  font-size: 12px;
+  color: var(--c-ink-soft);
+  line-height: 1.6;
+}
+
+.sheets-step-list {
+  list-style: none;
+  padding: 0;
+  counter-reset: step;
+}
+
+.sheets-step-list li {
+  counter-increment: step;
+  position: relative;
+  padding: 8px 0 8px 32px;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--c-ink-soft);
+  border-bottom: 1px dashed var(--c-line);
+}
+
+.sheets-step-list li:last-child { border-bottom: none; }
+
+.sheets-step-list li::before {
+  content: counter(step);
+  position: absolute;
+  left: 0;
+  top: 8px;
+  width: 22px;
+  height: 22px;
+  background: #34a853;
+  color: white;
+  border-radius: 50%;
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sheets-csv-output {
+  background: #1e1e2e;
+  color: #e0e0e0;
+  padding: 14px;
+  border-radius: 8px;
+  font-family: 'SF Mono', Monaco, Consolas, monospace;
+  font-size: 11px;
+  line-height: 1.5;
+  white-space: pre;
+  overflow-x: auto;
+  max-height: 300px;
+  margin-bottom: 10px;
+}
+
+.sheets-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.sheets-stat-cell {
+  padding: 10px 12px;
+  background: var(--c-line);
+  border-radius: 8px;
+}
+
+.sheets-stat-label {
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--c-ink-faint);
+  margin-bottom: 2px;
+}
+
+.sheets-stat-value {
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--c-ink);
+}
+
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-eyebrow" data-i18n="hero.eyebrow">TOKYO TRIP · 9 DAYS</div>
+  <h1 data-i18n="hero.title">東京 9 天行程</h1>
+  <div class="hero-dates">2026.05.16 — 05.24</div>
+
+  <!-- 倒數計時器 -->
+  <div class="hero-countdown" id="heroCountdown">
+    <div class="hero-countdown-icon">⏳</div>
+    <div class="hero-countdown-content">
+      <div class="hero-countdown-label" data-i18n="hero.countdown.label">距離出發</div>
+      <div class="hero-countdown-value" id="countdownValue">計算中...</div>
+    </div>
+  </div>
+
+  <!-- 全程進度 -->
+  <div class="hero-progress">
+    <div class="hero-progress-row">
+      <div class="hero-progress-label" data-i18n="hero.progress.label">旅程進度</div>
+      <div class="hero-progress-count">
+        <span id="totalCompleted">0</span><span class="total"> / <span id="totalSpots">0</span></span>
+      </div>
+    </div>
+    <div class="hero-progress-bar">
+      <div class="hero-progress-fill" id="totalProgressFill" style="width: 0%"></div>
+    </div>
+  </div>
+
+  <!-- 預算 -->
+  <div class="hero-budget">
+    <div class="hero-budget-cell">
+      <div class="hero-budget-label" data-i18n="hero.budget.estimate">總預算</div>
+      <div class="hero-budget-value" id="totalEstimate">¥0</div>
+    </div>
+    <div class="hero-budget-cell">
+      <div class="hero-budget-label" data-i18n="hero.budget.actual">已花費</div>
+      <div class="hero-budget-value" id="totalActual">¥0</div>
+    </div>
+  </div>
+
+  <!-- 各人花費小卡 -->
+  <div class="hero-payer-summary">
+    <div class="hero-payer-summary-title">各人已支付（NT$）</div>
+    <div class="hero-payer-grid">
+      <div class="hero-payer-cell">
+        <div class="hero-payer-cell-name">👨 爸爸</div>
+        <div class="hero-payer-cell-amount">NT$ 0</div>
+      </div>
+      <div class="hero-payer-cell">
+        <div class="hero-payer-cell-name">👩 老婆</div>
+        <div class="hero-payer-cell-amount">NT$ 0</div>
+      </div>
+      <div class="hero-payer-cell">
+        <div class="hero-payer-cell-name">👵 媽媽</div>
+        <div class="hero-payer-cell-amount">NT$ 0</div>
+      </div>
+      <div class="hero-payer-cell">
+        <div class="hero-payer-cell-name">👥 共付</div>
+        <div class="hero-payer-cell-amount">NT$ 0</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 工具列：語言切換、匯率、重置 -->
+  <div class="hero-tools">
+    <div class="lang-switcher">
+      <button class="lang-btn active" data-lang="zh">中</button>
+      <button class="lang-btn" data-lang="ja">日</button>
+      <button class="lang-btn" data-lang="en">EN</button>
+    </div>
+    <button class="tool-button" onclick="toggleRateSettings()">💱 匯率</button>
+    <button class="tool-button danger" onclick="resetAllData()" data-i18n="hero.reset">重置資料</button>
+    <button class="tool-button" onclick="installPWA()" id="pwaButton" style="display:none;">📱 安裝 App</button>
+  </div>
+</header>
+
+<!-- 匯率設定面板 -->
+<div class="rate-settings-panel" id="rateSettingsPanel">
+  <div class="rate-settings-title">💱 匯率設定（旅行前更新）</div>
+  <div class="rate-settings-grid">
+    <div class="rate-input-wrapper">
+      <div class="rate-input-label">¥1 日圓 = ? 台幣</div>
+      <div class="rate-input-row">
+        <input type="number" id="rateJPY" step="0.001" placeholder="0.210" inputmode="decimal">
+        <span>NT$</span>
+      </div>
+    </div>
+    <div class="rate-input-wrapper">
+      <div class="rate-input-label">$1 美金 = ? 台幣</div>
+      <div class="rate-input-row">
+        <input type="number" id="rateUSD" step="0.01" placeholder="32.00" inputmode="decimal">
+        <span>NT$</span>
+      </div>
+    </div>
+  </div>
+  <div class="rate-update-time" id="rateUpdateTime"></div>
+</div>
+
+<nav class="day-tabs-wrap">
+  <div class="day-tabs" id="dayTabs">
+    <button class="day-tab active" data-day="overview"><span class="day-tab-num" data-i18n="tab.overview">總覽</span><span class="day-tab-date">9 DAYS</span></button>
+    <button class="day-tab" data-day="1"><span class="day-tab-num">D1</span><span class="day-tab-date">5/16</span></button>
+    <button class="day-tab" data-day="2"><span class="day-tab-num">D2</span><span class="day-tab-date">5/17</span></button>
+    <button class="day-tab" data-day="3"><span class="day-tab-num">D3</span><span class="day-tab-date">5/18</span></button>
+    <button class="day-tab" data-day="4"><span class="day-tab-num">D4</span><span class="day-tab-date">5/19</span></button>
+    <button class="day-tab" data-day="5"><span class="day-tab-num">D5</span><span class="day-tab-date">5/20</span></button>
+    <button class="day-tab" data-day="6"><span class="day-tab-num">D6</span><span class="day-tab-date">5/21</span></button>
+    <button class="day-tab" data-day="7"><span class="day-tab-num">D7</span><span class="day-tab-date">5/22</span></button>
+    <button class="day-tab" data-day="8"><span class="day-tab-num">D8</span><span class="day-tab-date">5/23</span></button>
+    <button class="day-tab" data-day="9"><span class="day-tab-num">D9</span><span class="day-tab-date">5/24</span></button>
+    <button class="day-tab" data-day="emergency"><span class="day-tab-num">🚨</span><span class="day-tab-date" data-i18n="tab.emergency">緊急</span></button>
+    <button class="day-tab" data-day="packing"><span class="day-tab-num">🧳</span><span class="day-tab-date" data-i18n="tab.packing">行李</span></button>
+    <button class="day-tab" data-day="sheets"><span class="day-tab-num">📊</span><span class="day-tab-date">共享</span></button>
+  </div>
+</nav>
+
+<!-- OVERVIEW -->
+<section class="day-section active" data-section="overview">
+  <div class="section-title" data-i18n="overview.title">9 DAYS AT A GLANCE</div>
+  <div class="overview-grid" id="overviewGrid"></div>
+
+  <div class="section-title" data-i18n="overview.reminders">關鍵提醒</div>
+  <div class="info-section">
+    <div class="info-card warning">
+      <div class="info-card-title">⚠ 三大祭典時程</div>
+      <ul>
+        <li><strong>三社祭</strong>（5/17）淺草人潮 60–80 萬</li>
+        <li><strong>富士芝櫻祭</strong>（5/20）4/11–5/24 花期</li>
+        <li><strong>花園神社例大祭</strong>（5/22）2026 是「本祭年」12 年一遇</li>
+      </ul>
+    </div>
+    <div class="info-card tip">
+      <div class="info-card-title">💡 完整功能說明</div>
+      <ul>
+        <li><strong>路線地圖</strong>：每天詳細頁面顯示當日路線</li>
+        <li><strong>進度追蹤</strong>：點擊景點 ☐ 完成打勾</li>
+        <li><strong>預算追蹤</strong>：點景點記錄實際花費</li>
+        <li><strong>筆記評分</strong>：景點 Modal 寫筆記、評分</li>
+        <li><strong>天氣穿搭</strong>：依當日天氣自動推薦穿著</li>
+        <li><strong>緊急資訊</strong>：頂部 🚨 分頁含一鍵撥號</li>
+        <li><strong>行李清單</strong>：頂部 🧳 分頁打包必備</li>
+        <li><strong>多語言</strong>：中 / 日 / EN 切換</li>
+        <li><strong>離線可用</strong>：可加入主畫面當 App</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- DAY SECTIONS will be generated by JavaScript -->
+<div id="daySectionsContainer"></div>
+
+<!-- EMERGENCY SECTION -->
+<section class="day-section" data-section="emergency">
+  <div class="emergency-section">
+    <div class="emergency-banner">
+      <div class="emergency-banner-title" data-i18n="emergency.title">🚨 緊急聯絡資訊</div>
+      <div class="emergency-banner-sub" data-i18n="emergency.sub">遇到突發狀況時的救命頁面</div>
+    </div>
+    <div id="emergencyContent"></div>
+  </div>
+</section>
+
+<!-- PACKING SECTION -->
+<section class="day-section" data-section="packing">
+  <div class="packing-section">
+    <div class="packing-stats">
+      <div class="packing-stats-row">
+        <div class="packing-stats-label" data-i18n="packing.progress">打包進度</div>
+        <div class="packing-stats-count">
+          <span id="packingDone">0</span> / <span id="packingTotal">0</span>
+        </div>
+      </div>
+      <div class="packing-stats-bar">
+        <div class="packing-stats-fill" id="packingFill" style="width: 0%"></div>
+      </div>
+    </div>
+    <div id="packingContent"></div>
+  </div>
+</section>
+
+<!-- 📊 Sheets 整合分頁 -->
+<section class="day-section" data-section="sheets">
+  <div class="sheets-section">
+    <div class="sheets-banner">
+      <div class="sheets-banner-title">📊 家庭共享 Google Sheets</div>
+      <div class="sheets-banner-sub">與家人共用試算表、即時看到旅程進度與花費</div>
+    </div>
+
+    <!-- 統計概覽 -->
+    <div class="sheets-card">
+      <div class="sheets-card-title">📈 目前資料</div>
+      <div class="sheets-stats-grid">
+        <div class="sheets-stat-cell">
+          <div class="sheets-stat-label">花費筆數</div>
+          <div class="sheets-stat-value" id="statsExpenseCount">0</div>
+        </div>
+        <div class="sheets-stat-cell">
+          <div class="sheets-stat-label">總花費 (NT$)</div>
+          <div class="sheets-stat-value" id="statsTotalTWD">0</div>
+        </div>
+        <div class="sheets-stat-cell">
+          <div class="sheets-stat-label">已完成景點</div>
+          <div class="sheets-stat-value" id="statsCompleted">0 / 0</div>
+        </div>
+        <div class="sheets-stat-cell">
+          <div class="sheets-stat-label">最近更新</div>
+          <div class="sheets-stat-value" id="statsLastUpdate" style="font-size:11px;">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 快速操作 -->
+    <div class="sheets-card">
+      <div class="sheets-card-title">⚡ 快速操作</div>
+      <div class="sheets-card-desc">
+        匯出資料給家人共用試算表使用。產出的 CSV 可直接複製貼到 Google Sheets。
+      </div>
+
+      <button class="sheets-action-btn green" onclick="exportExpensesCSV()">
+        📤 匯出花費明細 CSV（複製到剪貼簿）
+      </button>
+
+      <button class="sheets-action-btn blue" onclick="exportProgressCSV()">
+        📍 匯出景點進度 CSV
+      </button>
+
+      <button class="sheets-action-btn" onclick="downloadAllCSV()">
+        💾 下載全部資料（.csv 檔案）
+      </button>
+
+      <button class="sheets-action-btn outline" onclick="showCSVPreview()">
+        👁 預覽 CSV 資料內容
+      </button>
+    </div>
+
+    <!-- 預覽區 -->
+    <div class="sheets-card" id="csvPreviewCard" style="display:none;">
+      <div class="sheets-card-title">👁 CSV 預覽</div>
+      <div class="sheets-csv-output" id="csvPreviewContent">尚未產生</div>
+      <button class="sheets-action-btn outline" onclick="document.getElementById('csvPreviewCard').style.display='none'">關閉預覽</button>
+    </div>
+
+    <!-- 使用流程 -->
+    <div class="sheets-card">
+      <div class="sheets-card-title">🚀 使用流程（首次設定）</div>
+      <div class="sheets-info">
+        <div class="sheets-info-title">📋 你需要</div>
+        <div class="sheets-info-text">
+          • Google 帳號（你已經有了）<br>
+          • 家庭共享 Excel 範本（已附上）<br>
+          • 5 分鐘的設定時間
+        </div>
+      </div>
+      <ol class="sheets-step-list">
+        <li>下載「家庭共享 Excel 範本」（檔案隨此 App 提供）</li>
+        <li>打開 Google Drive (drive.google.com)，上傳該 Excel</li>
+        <li>右鍵點該檔案 → 用「Google 試算表」開啟</li>
+        <li>點右上「共用」→ 加入家人 Email、權限設「編輯者」</li>
+        <li>家人即可從手機 Google Sheets App 看到</li>
+        <li>每天結束後，從這裡點「📤 匯出花費明細 CSV」</li>
+        <li>到 Google Sheets「花費明細」分頁，貼到下一個空白列</li>
+      </ol>
+    </div>
+
+    <!-- 同步建議 -->
+    <div class="sheets-card">
+      <div class="sheets-card-title">💡 同步建議</div>
+      <div class="sheets-info">
+        <div class="sheets-info-title">⏰ 建議同步時機</div>
+        <div class="sheets-info-text">
+          每日 21:00 左右、回飯店後同步當日花費 1 次<br>
+          → 家人睡前可看到當日完整紀錄<br>
+          → 不用 App 全天連網、節省手機電量
+        </div>
+      </div>
+      <div class="sheets-info" style="border-color:#f4a261;background:linear-gradient(180deg,#fef9ed 0%,#fffdf3 100%);">
+        <div class="sheets-info-title" style="color:#f4a261;">⚠ 注意事項</div>
+        <div class="sheets-info-text">
+          • App 主要記錄、Sheets 用來分享和結算<br>
+          • CSV 匯出後請手動貼到 Sheets，不會自動同步<br>
+          • 家人也可在 Sheets 直接輸入花費（會合併到結算）<br>
+          • 若 App 資料和 Sheets 不一致，以 Sheets 為準
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" id="modal">
+    <div class="modal-close"><button class="modal-close-btn" onclick="closeModal()">✕</button></div>
+    <div class="modal-content" id="modalContent"></div>
+  </div>
+</div>
+
+<button class="fab" id="backToTop" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">↑</button>
+
+<footer class="footer">TOKYO 9 DAYS · 2026 · 旅遊管家 App · v4.0</footer>
+
+<!-- Leaflet 地圖 JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+
+<script>
+// ============================================================
+// I18N (多語言)
+// ============================================================
+const I18N = {
+  zh: {
+    'app.title': '東京 9 天行程 ｜ 旅遊管家 App',
+    'hero.eyebrow': 'TOKYO TRIP · 9 DAYS',
+    'hero.title': '東京 9 天行程',
+    'hero.countdown.label': '距離出發',
+    'hero.progress.label': '旅程進度',
+    'hero.budget.estimate': '總預算',
+    'hero.budget.actual': '已花費',
+    'hero.reset': '重置資料',
+    'tab.overview': '總覽',
+    'tab.emergency': '緊急',
+    'tab.packing': '行李',
+    'overview.title': '9 DAYS AT A GLANCE',
+    'overview.reminders': '關鍵提醒',
+    'emergency.title': '🚨 緊急聯絡資訊',
+    'emergency.sub': '遇到突發狀況時的救命頁面',
+    'packing.progress': '打包進度',
+    'route.title': '今日路線',
+    'weather.outfit': '今日穿搭建議',
+    'weather.future.title': '距離 {date} 還太久',
+    'weather.future.detail': '天氣預報最多顯示 16 天<br>請於旅行前 2 週再回來查看',
+    'modal.intro': '介紹',
+    'modal.location': '📍 位置',
+    'modal.openMaps': '🗺 在 Google Maps 開啟',
+    'modal.completed': '已完成',
+    'modal.markComplete': '標記完成',
+    'modal.rating': '我的評分',
+    'modal.cost': '實際花費',
+    'modal.costPlaceholder': '輸入金額',
+    'modal.note': '我的筆記',
+    'modal.notePlaceholder': '記錄這次的心得、感想、推薦菜...',
+    'modal.estimate': '預估',
+    'countdown.before': '出發倒數',
+    'countdown.during': '旅行第 {n} 天',
+    'countdown.after': '旅行已結束',
+    'budget.inBudget': '✓ 預算內',
+    'budget.nearBudget': '✓ 接近預算',
+    'budget.warning': '⚠ 接近超支',
+    'budget.over': '✗ 超出預算',
+    'budget.notRecorded': '尚未記錄',
+    'budget.dayTitle': '當日預算'
+  },
+  ja: {
+    'app.title': '東京 9 日間旅程 ｜ 旅行マネージャー',
+    'hero.eyebrow': 'TOKYO TRIP · 9 DAYS',
+    'hero.title': '東京 9 日間旅程',
+    'hero.countdown.label': '出発まで',
+    'hero.progress.label': '旅の進捗',
+    'hero.budget.estimate': '総予算',
+    'hero.budget.actual': '使用済み',
+    'hero.reset': 'リセット',
+    'tab.overview': '概要',
+    'tab.emergency': '緊急',
+    'tab.packing': '荷物',
+    'overview.title': '9日間の概要',
+    'overview.reminders': '重要なお知らせ',
+    'emergency.title': '🚨 緊急連絡先',
+    'emergency.sub': '緊急時の連絡先一覧',
+    'packing.progress': 'パッキング進捗',
+    'route.title': '今日のルート',
+    'weather.outfit': '今日の服装',
+    'weather.future.title': '{date} までまだ時間があります',
+    'weather.future.detail': '天気予報は最大16日先まで<br>旅行の2週間前に再度確認してください',
+    'modal.intro': '紹介',
+    'modal.location': '📍 場所',
+    'modal.openMaps': '🗺 Google Mapsで開く',
+    'modal.completed': '完了',
+    'modal.markComplete': '完了マーク',
+    'modal.rating': '評価',
+    'modal.cost': '実際の支出',
+    'modal.costPlaceholder': '金額入力',
+    'modal.note': 'メモ',
+    'modal.notePlaceholder': '感想、コメント、おすすめを記録...',
+    'modal.estimate': '見積',
+    'countdown.before': '出発まで',
+    'countdown.during': '旅行 {n} 日目',
+    'countdown.after': '旅行終了',
+    'budget.inBudget': '✓ 予算内',
+    'budget.nearBudget': '✓ 予算近接',
+    'budget.warning': '⚠ 超過警告',
+    'budget.over': '✗ 予算超過',
+    'budget.notRecorded': '未記録',
+    'budget.dayTitle': '当日の予算'
+  },
+  en: {
+    'app.title': 'Tokyo 9-Day Trip | Travel Manager',
+    'hero.eyebrow': 'TOKYO TRIP · 9 DAYS',
+    'hero.title': 'Tokyo 9-Day Trip',
+    'hero.countdown.label': 'TIME TO DEPARTURE',
+    'hero.progress.label': 'TRIP PROGRESS',
+    'hero.budget.estimate': 'TOTAL BUDGET',
+    'hero.budget.actual': 'SPENT',
+    'hero.reset': 'RESET',
+    'tab.overview': 'OVERVIEW',
+    'tab.emergency': 'SOS',
+    'tab.packing': 'PACK',
+    'overview.title': '9 DAYS AT A GLANCE',
+    'overview.reminders': 'KEY REMINDERS',
+    'emergency.title': '🚨 Emergency Contacts',
+    'emergency.sub': 'Quick access to emergency information',
+    'packing.progress': 'PACKING PROGRESS',
+    'route.title': 'TODAY\'S ROUTE',
+    'weather.outfit': 'OUTFIT SUGGESTION',
+    'weather.future.title': '{date} is too far away',
+    'weather.future.detail': 'Weather forecast max 16 days<br>Check 2 weeks before trip',
+    'modal.intro': 'INTRODUCTION',
+    'modal.location': '📍 LOCATION',
+    'modal.openMaps': '🗺 Open in Google Maps',
+    'modal.completed': 'COMPLETED',
+    'modal.markComplete': 'MARK COMPLETE',
+    'modal.rating': 'MY RATING',
+    'modal.cost': 'ACTUAL COST',
+    'modal.costPlaceholder': 'Enter amount',
+    'modal.note': 'MY NOTES',
+    'modal.notePlaceholder': 'Record thoughts, experience, recommendations...',
+    'modal.estimate': 'Estimate',
+    'countdown.before': 'COUNTDOWN',
+    'countdown.during': 'DAY {n} OF TRIP',
+    'countdown.after': 'TRIP COMPLETED',
+    'budget.inBudget': '✓ Within budget',
+    'budget.nearBudget': '✓ Near budget',
+    'budget.warning': '⚠ Approaching limit',
+    'budget.over': '✗ Over budget',
+    'budget.notRecorded': 'Not recorded',
+    'budget.dayTitle': 'TODAY\'S BUDGET'
+  }
+};
+
+let currentLang = localStorage.getItem('tokyo_trip_lang') || 'zh';
+
+function t(key, params = {}) {
+  let text = (I18N[currentLang] && I18N[currentLang][key]) || I18N.zh[key] || key;
+  Object.keys(params).forEach(k => {
+    text = text.replace(`{${k}}`, params[k]);
+  });
+  return text;
+}
+
+function setLang(lang) {
+  currentLang = lang;
+  localStorage.setItem('tokyo_trip_lang', lang);
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
+  document.documentElement.lang = lang === 'zh' ? 'zh-TW' : lang;
+
+  // Apply i18n to all elements
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.dataset.i18n;
+    el.textContent = t(key);
+  });
+
+  // Re-render dynamic sections
+  renderOverview();
+  renderAllDaySections();
+  renderEmergency();
+  renderPacking();
+  updateAllProgress();
+  updateCountdown();
+  if (window.cachedWeather) renderAllWeather(window.cachedWeather);
+}
+
+// ============================================================
+// IMAGES + SPOTS Database (same as before)
+// ============================================================
+const IMAGES = {
+  'skyliner': 'https://www.genspark.ai/api/files/s/VUWppe9T?token=Z0FBQUFBQnA5dGxTVjc5ekdna0tia3ZhOWVqYVFEcXV0di1CUHlocUxtTjRuX0IzQi1LS3VJUXc1QXBiYXZNUWV2NUFKM1psOFlYYXF3V0R1N3M0ZUZFcERrOHVPNkJOZFZLV2VsZGM4Sy1mdmRFbERlQTFvcmluSkd6Yzdvc01yaGYwYjdnRmstd0g4VG1lWnN2UE9aRkVIbTNpQ3NIRGlLa2V0bUtyTUc4MnJHc3BCZlJNd0ZONHJYT2xxU0ppbG8yYXFvQjlEX25zRDN6dmtOdGxaaTVKYjA4V3VZeFVuWHpEX3BpZ0NNcHFwUWN1U0NBWm5lOVN5UThsbHFqV3pBdnNVM2k3a0xXRm1KRnF5YzN4NjNMR3NwdTFXOTZzR1E9PQ',
+  'mystays-nippori': 'https://sspark.genspark.ai/cfimages?u1=whGbDcNa3b555ipxV9YRPqgwAExZWqkxJoYkIYbPFnAEB2fs3nKNLP3J7f0w2EDC65NLd2K9GXfvw6lSEB626TtlNvI3h69il4aLOLTz0YPA8fLYU64DlK5EVHOj7byqNIf4nn7H%2Fn0Z6ij1M8Y%3D&u2=DMfoXFdq2Il%2FzSDD&width=2560',
+  'yuyakedandan': 'https://sspark.genspark.ai/cfimages?u1=ss4zvi2ZMNd9XZcObBnOKZoRSPwQOiomTGGztIx1IGdw6IGoaSUJ2yOhmsOmPybQ%2BWqdwm5zDj6XcKBR2PPC8ETkFTI%3D&u2=8xQDv5FbbAjz3lQI&width=2560',
+  'bazoku': 'https://sspark.genspark.ai/cfimages?u1=diMKHg%2FZXAdfi7U5j%2F8tsZ5UHkiq%2FnlT6Fk7Pfen8cEr%2BxiwF02iSCea6A1ipoZOzcjlMpCTy4Nxxhf5uLoErI0jaCrrPJg4hk8Liq2Mq4N3&u2=%2B7ZZw6oI6nTsYN6%2F&width=2560',
+  'habutae': 'https://sspark.genspark.ai/cfimages?u1=cITCtlSAUwvwv1x8zrpOdp%2B%2Bcwv0gB1aWzu5T8624CT%2FfrCgj%2FGDbGr0GO%2BfB8XN3n3BxJ5FF4LH8aJKjglJh1bOOeWQghZxozc%2FvjvKjwmpB5TCB%2FqSGON%2FAVJ9v3vtqOijpJLCuQ%3D%3D&u2=RFbf0fRy82%2FQUOCd&width=2560',
+  'ueno-zoo': 'https://www.genspark.ai/api/files/s/rRtyU28n?token=Z0FBQUFBQnA5dGxTY1hmekREVTBmTjhWUEZvcnNKd0RucG1GMnBqUjg0RHVCdXNRMFZfUWVrNVA3cjcyOVRWZVBJNVA3d1Ita3d2R2Vza1lDVHJNOTRJYTNCWE1xSEo2NFpNS0Nlem5VS1RQRW4zZGRocThEQkRrWTBZSE5aQXFBTUczMUFQa3BGRXRrdmZsTm9EVFZ6WTN5UlV3Rmx0VUo4WEhxQk8ycTRaNmNJOFFzeWE3eUtqdVZvX2JMcUZiODBPR3F4WnJjNUktNUdqNmktR1pLTENUV2lJZGhjb2NmVFd2N1A1bEtheGlDWGRyaVRWRVdSRGRrdW1VVHF4ZFpodWhIVmItS1pORHNpQkpxSy1LTnpBOG5fUWM2WkpsYUE9PQ',
+  'ameyoko': 'https://www.genspark.ai/api/files/s/wsukEI4c?token=Z0FBQUFBQnA5dGxTVzVkN08zNUdhRlBHWk5NdkM1YmJOcnBSSEpZU2xDOXdKWHh6Ui1HbUNQLVZieUFINmpMTDYzZUhnQ0xCX29QRWxnNFZLcmk3SDFFS25DZGZoTEdGaURjNzlJSEo3ZTdxVFhad0tWTkc3N184WGpVRlhROXZoaXIwSmk3ZmtaVThkcE5DZ0dBTFhOU1plZlZtdUxZSTZlQ3ozb1VINzZHTTdPRk5lejdOcTJzSndhSEVsaEtuTmgzQTdDa3ZQOURMVFk3MGxOanUyQ0xzaE5jZlBvVktEc3Q1UktINlpxeGJLMWdLcVFUVFhUaG0zOFU1aTJ6U2tJVS1ZbGpKckR1MTNVNWc3dEdlTlV4Rm4weDVvV01JQ2c9PQ',
+  'sanja': 'https://www.genspark.ai/api/files/s/vVwdbVFY?token=Z0FBQUFBQnA5dGxTUGw1YUg1ZGE2Y1Y0bkxQOFJvX2F1ZDNjelhYeXJzb1Y4LUpkS0liLVZYOU5ScEwwTUQ0QlVPMUUyZW1XYVNZTjllRWpLTy1fZ3JrRWNwLTNuSnVLMGh3cS1wSDBlazYtOFlEdFNGNHB0QW40b1hOVnB4NUJoZzRsRmZ6ZEdfaVJ2U3RSblBUVFpTOVpBOFBpSFVCZUhZeXNTV05vX3UyeVpHX1BBcDJMT2o4ZFlYUkw4LUY1WHlqOUJONHMwRHF0a09SZHN6a3ZFeTczeHNqeWZtdGhqVXN5Mms2eFBCX1RUeXlxQllXQjNXUmpTZjBudUxxRm0tRG5veDRsb0xLbWw2SmhkTUJIWWw3ZU9zTkVjbHBJVHc9PQ',
+  'skytree': 'https://www.genspark.ai/api/files/s/j1sNqsFc?token=Z0FBQUFBQnA5dGxTcWc2X183a21tMGp4Umk5VUV5bWw3ODJpcUwySzJYRkhZTXJwamFCTHRLVTJZZTJ3MkotdU9SUm9lRkllbmVjRjhjVmI5NmI0SGppbFZUMFp4RzBWUEVQQ1A3TDBmQk1Ta2g0SlpPcUlBX3c2eHJrZDRFNjVublQyc1JmWmxmUjFjUVRHdHZWTzYzOEpkYWhYMW5ZeE5rbGNyNG5IaWpmVmszeExkRzhsY0phRklCaVZLWUlYVDlQMlpOT2JwbXAtc2NoMHEzcDdOaktqZ1dNSmNFSUt2clBkTXg3TzNWazZGNk5yN29OVUo0Y3pPU013ZnFwMzlaWG05Q25mbDBoUlpsY1M4RHFiOTNZb05vXzRLVEpacnc9PQ',
+  'solamachi': 'https://sspark.genspark.ai/cfimages?u1=%2FgJZ%2BPvtOQ3HgQpfqrZ6iIDxC4JHaYHg1LsSPxyqtedrAG5rjWexVMG47l3j%2BhrFiOJptFBPtdtnL82uGbjKeOqXgJW%2FsxIOPBHkHPuDUoZvMKuQKowqmc6%2BYxpw7KGF3uCjMCUdkg%3D%3D&u2=roDKdMDIJZqB%2Fl3Y&width=2560',
+  'yaesu-bus': 'https://sspark.genspark.ai/cfimages?u1=YOG4CsjTAQ%2BwE4gGW99nq4caS0PeSpTLBOkjAoLZI6ETh6pEQwlUsSjQSYlJUf%2F2PzN9QD9cVY35XVQiOy8bYR3aFN7747hQEog9BjXsfMsGt6zbrzIRFcHlT4gdY7ZgUXYDgc%2BH1d%2BvGVR2HVlblMjnCOg%3D&u2=%2F%2FfnOOhMLUQHxVD9&width=2560',
+  'ryugujo': 'https://sspark.genspark.ai/cfimages?u1=l09JmjoMg3aR5WELjObFzDCQJ3gtM7rUHY9gXUgKMjHtF0VBx6AUyCMEH08%2F2jDYZCMBfFd2pGk%2BS%2FhdcxWfzmHOpvWehXz43FA8LPELucqgy7rXR6AMN7T%2Be0UKbmDgqd2P%2F2QaiBSZMAU%3D&u2=X8Pp03iJ2SNLanIh&width=2560',
+  'tokyo-station': 'https://www.genspark.ai/api/files/s/4hJRJtTx?token=Z0FBQUFBQnA5dGxTNUQyTEttaFQ4MUhLcGdMeGc0THVIT0EzcUNuaVF2V2ltUnpjSWdwdGN2N0hTNE5GMWVmSTM1Z1JnOHFraE9XWFpUZDYtNktkUmJUcE5BNVV5bXVBQXZCQV82cDdBT3g3WjhFM0Y2TldGR25QU3JNNVRyUWJJM0FqNE1kd0FNc0NKejUzdHczcXNJUVFsMlVGQkp0a0E0SjE3SmtLX3FyZkdJVnVjd3hvbmgzYUhUOWpQLVJNYlA0UjRjN01yZXptbGNEeV9KWUVTTzhqVlRBWWkyQjQtdzM0TUVtcU5CZFpPR3ZQSjc4dDVIN05zOVFoVUhId1RGY1A3bU04RXRaZVNEWXFPQjk2aEJidTJiaTRGY0FYLUE9PQ',
+  'kitte': 'https://sspark.genspark.ai/cfimages?u1=6tWYhjSNUA%2FY1iZFw39vNe7TJKPrz0To1k4CkJA6gonFD3JfhbbISY9kNspgD0xTucd6zerMoQBugQLWLQOTUAP5DczJd4JV6%2FzzhCqM8OTtoP3kYXorUJ%2BcEYteRaQKmWbjS%2FIyNM0rKkbKbL5rRq5B8emRglTBAvuL0sHkhxljxs0DjZP%2FYDvfPoMieThXdtCt9ihZfLE8WhEqPc%2Fi8hZdapVvYp%2BnGvI0q%2BpxwYxS%2Bp%2FB4QXLtTYK&u2=kgHjO1fN7fYMiYFZ&width=2560',
+  'yanaka': 'https://sspark.genspark.ai/cfimages?u1=v1wJaBsMXM5dKJaPda5j1s9bJhuc3mLQeiTc%2BTUZPKgka%2BK%2F1nVMzOjY7UV1gLF8A4CxCwUdv1BOngFcKH7uxsaWLpPAHpf5PfJH9cjCelRdrruN6dc%3D&u2=%2FVne7UFpUQ9KJDui&width=2560',
+  'azabudai': 'https://www.genspark.ai/api/files/s/g2BU1jnl?token=Z0FBQUFBQnA5dGxTbVN5czBBcVZLYkZrTUQtOGVvZ1Q5eVZScE9YYlhmRGpUN2xkWUZ2WVVvVW5oNlJtVmM5VDVDZU8xeWtPbmpTaFRGRG8waFVRdnV4dkcwbG9qdldPVFQ3aTVwUmVCc2llTThjNkdFbU96X25JY1NzMW5sT2dHQmpONV9iQjZFcmJmeEVkY1cyVXF2N3JfRElBYk1OZWdybHkxaE11dFJSbEs2cVBwelFJTTNJTzlLQ3I2dkZPWDQzYnZWQkVDU0V6UUtSNVViU3VNcmVhWUx6TU9yM2diREdpTGFjZ2hweXh1MjVzLUZhbXRlYW1jMmtrLTlKVXoxRFJydTBqSWZyV2Z4dHg1SFBZSGJtSlNzS3g0eVFQb1E9PQ',
+  'teamlab': 'https://sspark.genspark.ai/cfimages?u1=oYDqoPqBPLK2sOxrBgDVAHzwMjLY62bZWUKaGsytgiutC%2B88uc1cUC36Kb%2B%2FXCGz7%2BeWZIAeSvVEP0HSsv3doE2Exr3E0NXWbhxw8Lmj%2FWNJHIHmh6ioATpZmPZpzqIzE6eYkv9HYkgYtwpxO43mZSOduBc%2F5FMkbJuoptw%3D&u2=IC9pQyftae0EkKb3&width=2560',
+  'mori-jp': 'https://sspark.genspark.ai/cfimages?u1=E4MuhMjvfpbvO725rGHwDMMILWeoP4WqHGEDgQUrwR1qLMD2ETZsbeSKKkn0vXkYAmeNqrr8sonsAULqIC%2FKSIWDsl92NI40kvEmbqc9GGdR9tU05Mb%2F2y2GFDo6FZhzSHXNT0KAfO0Cvn8pySfnowaQkO9Z5nKXiMK8nG9bYOFzBPUBwHfTi2iqfKqt4tLnO8BpdMwysTTiFVnLo4qjJyddwEj%2BsydZH2u8GzAeRBBEAke7hA2tXYsd9enYKP%2BLIRjBqjoT8KAWJA%3D%3D&u2=40QsvNfK0KptykZ%2F&width=2560',
+  'shinjuku-bus': 'https://www.genspark.ai/api/files/s/K8lTkPB5?token=Z0FBQUFBQnA5dGxTYVBPTG5fWlI5eThsUDVUVHUyVE5vSU4zVHp0eDRlZEJUNEF0NVBELWFIV2ExcHdKb19qekZGWWpLWFRYTHh0NWJNV1BwMnMtNDcyQ0RUbnRHMDdvaTAzTXZaTHJ3Qm96TlVkWXRIZ0cxMXN0YmlsMnBCQlNZSG1KZ0g2UmF4dXJTTFByajNmWjRLYmFEZGQ3VGtFeTB2OXdMazFXd3VBam5jX0NEWWhWeV9Gb3FNamlpTTFaUkY3UHlYVGJJMGdYb1Z3djZ2Y29qVFR5MDBSbTlUQm9aNEFQT0NZWk9BU3ljc1gxOHZSenJpbmJlaDB3aTRKVm9Xc0tPdDBJRHFEZkNjeC1ZVFFxTVRJbVcwZG9OQUhPSlE9PQ',
+  'shibazakura': 'https://www.genspark.ai/api/files/s/oZoppXUI?token=Z0FBQUFBQnA5dGxTMm5KVkk2WE93UXJWUy1zRWVNcHl2OWN6dExvMzVuWTFURk1oMVhmd0RIM2hPLUhpYVVQMDIwQU1WQ05SNkdXaWtiRWRFdmRzd296ZUktY0IwZk9VOUlEbXJ1OHloM3dzNWN4ejFLVks0bDVoRVZYMkVfTDFqcFhqcXlzMDNsT3VLZXNBZkd4MXQzdzE2eHZmbnNrTkhyLXRucDhVWkl6VzFsVXVqNU1TQUdiT29BWDNxeFAxZmVJZy1NS2NsMjZzYUw0b0tGQURxemZtbHpRTHNMcC13SC13Tmg5OFNLeE8yS21PNnJCRXVHUzdnS09hNThJNm9DWkluRVVSbExneldLd2hPTnRLSWVaWURBMUdZTUpRdWc9PQ',
+  'ensoleille': 'https://sspark.genspark.ai/cfimages?u1=1G9RtOPYQxsPDRi01STz3P6tcH0W9VKc%2FuWxUhHyKoixQRlABw1N5YugzabaXC04DA6WbOLN8JYZd%2B4SNA7QrKf8H2HdhPE9DZHrU3YzaHmx&u2=N%2BDzAnvgzZgZ8pPE&width=2560',
+  'kawaguchiko-bridge': 'https://www.genspark.ai/api/files/s/wSwMfl72?token=Z0FBQUFBQnA5dGxTaU1JeTU3dk5fVm8xZEhZYkZLZGJjOWotVl80YkNSNDZWVnFKeTRyS0EyVFdfNVRyTHpVSnBvTnlWODgwQV9NVnhkWmxPQ0hpOWFtWkktSGhxT2lRQmpxcHlWbV9VSUE5RlVIdE9PYlowd1dVNnlEMXBZZnVoMUZoeWphQVlOcG9iaGVwMXRTWC1MTEN1VFNQOGRGU29CODcySFAxZ1pwZ1R1Zk9zNmZGdllBRXRzcFpfVUFscmtmMUllY3I2WGxXS3F6MVNBX0NjR2tQZElEOGRmaXBPR3hZMUJaeTdnM1pvV2l1VGt6N0Vzdm80Zms1Tk0yclZuZ2ZyRlZsYTdPeHgzdjl2T09TbHBfd256QVdGbkZCN1E9PQ',
+  'mystays-fuji': 'https://sspark.genspark.ai/cfimages?u1=gaVU%2FWlSaSGo72CY8q8V6VJxXrRCC6ULdocIe89lNem182%2Bk4DfdTrqs5A0lUV4icxEBOWs4hvXYEalzH%2FNj7Ph1qy%2BjG9vJIUhmRezBukrPwQ%3D%3D&u2=Q%2BTFt6WZv64OutBr&width=2560',
+  'oishi': 'https://sspark.genspark.ai/cfimages?u1=SdyCwk1CJC5YqB1wN1lba4p1uw%2BhqMDe6BYC%2F920k08uU2DgLqpqIy9i%2FEsadAiYdayUbN7mpS7RVQ%2B%2FutaH3SrDM01GSo%2BDggXE&u2=haaaWTvGnyCaaUbZ&width=2560',
+  'orgel': 'https://sspark.genspark.ai/cfimages?u1=spyQd%2FHqVG7Rxuc3QPL58EwlU%2FlEKl%2F7IvHf%2B9GmLkngI%2Bp6bZSuke1pJXqxNWCcSueYQFWbuRbcQQFcCWi29UXs6N6m4OEYUGecMWCMRsuKAHVMXCjA1%2BfHRqpNJMT5RrzuXsVzDiEfrM0u15C%2FGdLfS0FHXF0Y42VUNiJ1K47n3W9YI%2FrKeg%3D%3D&u2=KtP814apH8rGjAl%2B&width=2560',
+  'tenjozan': 'https://www.genspark.ai/api/files/s/n7WmbLay?token=Z0FBQUFBQnA5dGxTbnVrQTlMUy1RY2hXbUVTenpyMWNFQzRvek1Pc0FZM3BsTVIxYUhmQnBjclR6UE0wbW1mQ3dxTWRDaThnMHFCQ3E0YUEyamFRWG1DMVYxcmZMaEtiTkI2NnRJWjBhQjNEWFlsbmF2TG42NTQ1RHM0MlF6aDZiNWUxbEdjQ1JfWU9RVUxMRXpIN0tqdHp3b05VVWg2VnpZS25kY29WcUU4QTRPNjlNdUR4WDRka3lvQW4yRy1PanNxSTBSNU41QUxmZHVJYkkwc0NnTFhjZUJYa2V1cWFUMS0wbHd1d21lX3U1V3BIOVd2cnVzUUxDX1RFbkVtQV9SSzJQY1ExRHd2NkZLVW9sdG5BSEtDdnBoY1d5Zm9VdEE9PQ',
+  'uber-fuji': 'https://sspark.genspark.ai/cfimages?u1=m1yu5fapzcGEhSHAglNqx46CEXs3%2F58U3S4lMQ2QC45yU6NU%2BSBtL76jFCYFoT3b8D9wTI8dxFyM%2BIHUaZv6IyLENbU50OPtc%2BjkBOVZQ%2BuDgV5Em%2BA%3D&u2=OvDEIKppBcHfYTCd&width=2560',
+  'arakurayama': 'https://sspark.genspark.ai/cfimages?u1=P%2B6CW%2FzoUL7arF%2Fbp1b5tam%2BS289SrzQbAiXFAO4MxwjtpycNBhJd%2BW0K8Wo6at6XIkSx6uVLCAoXQI%3D&u2=xCsMmAXKqtyi0KwT&width=2560',
+  'houtou': 'https://sspark.genspark.ai/cfimages?u1=HejAGDWGfMLqMvi2WPnX8pcYlrDAS%2FD9uzYpFFSVyHUxf3Cn6%2BndbyTMkOBCxzBbPYKoSLj%2FsE%2FYYBDzkRsEiHM9F1lg3GgNx2btcqxVEzH1t1EemtzOzjGlJljbWIU%3D&u2=fIEISLdk2gg2LLhb&width=2560',
+  'fujikyu-bus': 'https://www.genspark.ai/api/files/s/ehe3bbHe?token=Z0FBQUFBQnA5dGxTLWxPMVFkWWllUlBwbDhMU3RMY05hbHJfQ2U3QXA2RU9nZVpYSnJPQ2tXTjd4ZmtlUTB5M0VoTHdqbmFDb2JTWFoybWNRMnlIaEplRFYwOUZVcV9wWm5qX3RqbjcxeFhGZTg5Yk01UFd0bU1QR3dJQTVoMi1yekt6NDNVZnJ1c0ZqaW0xQThtUTRqNnc1ZjhsUERWQlZzN095ZEFYZFd1OUVVWWhEWVZjXzQ1OEE5Mk01NXBfSDFBWTg3NzlCOWRpZzM0VHdvZXlQNFVmZVRfLVBMUGtuUks2X3VhZW44MUNLNHFBR3EzY1ZtM0F6aGt1NVZOd2tCSmpZLXdOcmpGN1pJbDRlMnB5cmNCWmtkYnJYeUhwZ2c9PQ',
+  'shinjuku-shop': 'https://sspark.genspark.ai/cfimages?u1=fmXMXTqMAQP6zGGWtF%2Bkr8H6JHZ7UC9WoDVjGqzU7zTorXrAg%2FEpkqTgJCppS0LHO4O2dtNnY05UiqiPgTjmnjeNUcKTG9bG7u6nlXp4LeeH3kH2hClG9lh0nyc%3D&u2=N6uOJ9YtrWakSb8j&width=2560',
+  'tocho': 'https://sspark.genspark.ai/cfimages?u1=PMqfcGkehidVjIhB%2By4HqROHnNeHpnRaGlCmcQtwH%2BEfTiEUgDLebWff9jAfY2p%2B4G0FN%2F118tWmvOA%3D&u2=cviBDtQkZcQZET%2Bh&width=2560',
+  'hanazono': 'https://sspark.genspark.ai/cfimages?u1=DhATGImhXFD6js25cpRuWEwbLie6sYD3u1uVHnL%2B%2BWzGLQEtDW6r90c3vOCKehoywCsVHxCGnu0MblWkr%2FZSI1xylnzR%2FtBPIygEDCL3vMLHUuZBnXuBuVVYE1P1%2Fw%3D%3D&u2=zFydLxB3BDeMUSP%2B&width=2560',
+  'keisei-narita': 'https://www.genspark.ai/api/files/s/VUWppe9T?token=Z0FBQUFBQnA5dGxTVjc5ekdna0tia3ZhOWVqYVFEcXV0di1CUHlocUxtTjRuX0IzQi1LS3VJUXc1QXBiYXZNUWV2NUFKM1psOFlYYXF3V0R1N3M0ZUZFcERrOHVPNkJOZFZLV2VsZGM4Sy1mdmRFbERlQTFvcmluSkd6Yzdvc01yaGYwYjdnRmstd0g4VG1lWnN2UE9aRkVIbTNpQ3NIRGlLa2V0bUtyTUc4MnJHc3BCZlJNd0ZONHJYT2xxU0ppbG8yYXFvQjlEX25zRDN6dmtOdGxaaTVKYjA4V3VZeFVuWHpEX3BpZ0NNcHFwUWN1U0NBWm5lOVN5UThsbHFqV3pBdnNVM2k3a0xXRm1KRnF5YzN4NjNMR3NwdTFXOTZzR1E9PQ',
+  'sawara-eel': 'https://sspark.genspark.ai/cfimages?u1=0zVS3MQgWiHmAu%2Fdh0S6iu5jy7N0cXM9tpgm%2BCa94a6CeMIO4mpn4Bl6z9S1Zb317dW7UsEg2JEsENgMiLp9lFTXCC6H9U05uufxDnWxHuIM4T2ohspJKEsLFfo%3D&u2=DyH8L9Il%2B7uJVOFa&width=2560',
+  'onogawa': 'https://sspark.genspark.ai/cfimages?u1=HK4uqt5Dj155VVfr6A7TEAsCIaBg%2BaYI8tfez5AiK29Sit5sQCa2Eox943kwFfRw5h8cn0XYGmlvYdyIu3gGupIlcjQvIY3voStBWt7jmkxe11Pz1g%3D%3D&u2=5baBqeWd2e1MTCtO&width=2560',
+  'ino-tadataka': 'https://sspark.genspark.ai/cfimages?u1=gUWWRZwHY%2F7EPbYDQ6USz2CRiy5O7VHNXrc6Pnb%2BxgoXLx5ak%2FbwieI7Wx5TCARRFW2iZhnZsaVrMG67xV8RS0vSEzUinMzujjg%2F%2B1g2fSkYJ%2FbqjA%3D%3D&u2=s%2BSVxEkr9YMZvOqE&width=2560',
+  'mitsubishi': 'https://sspark.genspark.ai/cfimages?u1=BHwZnHSA3dikxtbS4rMsVBWTL71fA1VV%2BcGG1XrOAaXWzPaOOep8VCJljfQEff9jDtteX3n5P5K%2Bv73vGVlpzFLlMODs1fQDiLM4tGDmEqPpJksQquq8pApkUuFgHktPQ0j%2FOKozitFwdNL%2BARGldb3K&u2=q1wgf%2F351TGb4cNw&width=2560',
+  'naritasan': 'https://sspark.genspark.ai/cfimages?u1=B%2F2EX0ntlyBpRh%2FHdnC0Yr64jh8zo%2B8cgN%2FQIiflTP6Um0efnPZu5EV9caM0TtPao8LhZgKq%2B4E0LqG%2FN1xBP6WHS37QuxVicC34zFzA8vGSctJ6chGt%2BCHIrhd%2Bzc4bKWqZHEQ%3D&u2=M5%2B9zuYzBgH5Tz3l&width=2560',
+  'aeon-narita': 'https://sspark.genspark.ai/cfimages?u1=co%2FpZ4IYEXGF%2BIDrDBCYKo2zd0C9SICGmvU6FFcSui1%2BXW6UmtEHv7sfGsihd%2FY23L54BYTlADOAKoap6%2F%2Baf21hg9922EYjJovVjsbyAVwbcmS4pLXN9LBoczOy9j5F4ENzwPmBximClzSnQ%2Bjxtw3mkmkf&u2=ctyiIxieIyvABB%2F%2F&width=2560',
+};
+
+const SPOTS = {
+  'skyliner': {
+    tag: 'TRANSPORT', title: 'Skyliner 京成電鐵', subtitle: 'Narita → Nippori 40 min',
+    image: IMAGES['skyliner'], coords: [35.728158, 139.770641],
+    quick: [['車程','40 分'],['票價','¥2,580'],['類型','對號入座']],
+    intro: 'Skyliner 是京成電鐵運行的特急列車，從成田機場直達日暮里只需 40 分鐘，是機場到東京最快的方式。',
+    sections: [
+      { title: '亮點', items: ['全車對號入座、舒適度極佳', '比 N\'EX 更快、價格更便宜', '中途停靠青砥、上野', 'Wi-Fi 免費'] },
+      { title: '購票方式', items: ['<strong>事前購買省 ¥200</strong>：KKday/Klook 電子票', '機場現場購票：T2 地下 1 樓京成電鐵', 'IC 卡購票機亦可'] }
+    ],
+    warnings: ['建議事前購票省約 ¥200', '車內無大件行李架'],
+    links: [{ url: 'https://www.keisei.co.jp/keisei/tetudou/skyliner/tc/', label: '官方中文' }]
+  },
+  'mystays-nippori': {
+    tag: 'HOTEL', title: 'MYSTAYS 日暮里', subtitle: 'Hotel Mystays Nippori',
+    coords: [35.72763, 139.77422],
+    quick: [['Check-in','15:00'],['Check-out','11:00'],['距日暮里站','5 分']],
+    intro: 'MYSTAYS 日暮里位於 JR 日暮里站西口步行 5 分鐘，是探訪谷中、上野、淺草的絕佳基地。',
+    sections: [
+      { title: '飯店設施', items: ['投幣式洗衣機（¥300/次）', '24 小時前台、行李寄放', '免費 Wi-Fi', '便利商店 Family Mart 近在咫尺'] },
+      { title: '本次入住天數', items: ['Day 1（5/16）抵達當天', 'Day 2（5/17）東京下町', 'Day 4（5/19）東京三面相', 'Day 7（5/22）花園神社後'] }
+    ],
+    warnings: ['Day 3、5–6、8 不在此住，但大行李可寄放', '退房時間嚴格 11:00']
+  , links: [{ url: 'https://www.mystays.com/hotel-mystays-nippori-tokyo/', label: 'MYSTAYS 日暮里 官方' }, { url: 'https://www.booking.com/hotel/jp/hotel-mystays-nippori.zh-tw.html', label: 'Booking.com 訂房' }]},
+  'yuyakedandan': {
+    tag: 'LANDMARK', title: '夕燒臺階', subtitle: '夕やけだんだん · Yuyake Dandan Stairs',
+    image: IMAGES['yuyakedandan'], coords: [35.727647, 139.767086],
+    quick: [['距日暮里站','5 分'],['停留','15 分'],['費用','免費']],
+    intro: '位於日暮里站西口附近的階梯，連接御殿坂與谷中銀座入口。因夕陽餘暉照耀街景而得名，是東京下町地標。',
+    sections: [
+      { title: '為什麼有名', items: ['1990 年代命名為「夕やけだんだん」', '貓咪聚集點（白天較多）', '《男人真命苦》、《孤獨美食家》取景地', '通往谷中銀座的入口'] },
+      { title: '拍照重點', items: ['黃昏時順光拍攝', '從階梯頂端俯瞰商店街', '可向下拍攝、抓拍貓咪', '夜晚紅燈籠氛圍佳'] }
+    ],
+    warnings: ['住宅區、夜間避免大聲喧嘩']
+  , links: [{ url: 'https://www.yanakaginza.com/', label: '谷中銀座官方介紹' }, { url: 'https://tokyo.letsgojp.com/archives/30013/', label: '夕燒臺階導覽' }]},
+  'bazoku': {
+    tag: 'RAMEN', title: '馬賊', subtitle: 'Bazoku · 1992 手打拉麵',
+    image: IMAGES['bazoku'], coords: [35.728575, 139.771964],
+    quick: [['營業','11:00–翌3:00'],['預算','¥1,200–1,500'],['距日暮里站','東口 1 分']],
+    intro: '1992 年創業的日暮里地標排隊名店，最大特色是「現場手打麵」表演，師傅在開放式廚房揮舞麵團。',
+    sections: [
+      { title: '招牌菜', items: ['<strong>叉燒手打麵</strong>：經典招牌、半熟蛋必加', '<strong>雲吞麵</strong>：手工雲吞皮薄餡多', '<strong>味噌拉麵</strong>：濃厚甜味噌', '<strong>炒飯</strong>：鬆散粒粒分明'] },
+      { title: '排隊技巧', items: ['週末 19:00–21:00 高峰、約等 30 分', '20:30 後較順、適合 Day 1 晚抵達', '深夜 23:00 後幾乎不用排'] }
+    ],
+    warnings: ['只收現金或 IC 卡', '店內座位緊湊']
+  , links: [{ url: 'https://tabelog.com/tw/tokyo/A1311/A131106/13003557/', label: '馬賊 食べログ介紹' }]},
+  'habutae': {
+    tag: 'WAGASHI', title: '羽二重糰子', subtitle: '1819 年江戶老舖',
+    image: IMAGES['habutae'], coords: [35.726727, 139.773757],
+    quick: [['營業','9:00–21:00'],['預算','¥600–800'],['距日暮里站','南口 5 分']],
+    intro: '創業於 1819 年（江戶文政 2 年）的東京最古老和菓子店之一。「羽二重」指糰子質地細膩如絲綢般滑順。',
+    sections: [
+      { title: '招牌商品', items: ['<strong>醬油糰子</strong>：經典原味、¥250/串', '<strong>紅豆糰子</strong>：自製紅豆餡、¥280/串', '<strong>抹茶糰子</strong>：宇治抹茶、¥300/串'] },
+      { title: '歷史小知識', items: ['夏目漱石、芥川龍之介都來過', '1819 年至今 200 年經營', '保留江戶時代糰子製法'] }
+    ],
+    warnings: ['21:00 結束營業、20:30 後請早到', '糰子當天食用最佳']
+  , links: [{ url: 'https://habutae.jp/', label: '羽二重糰子 官方' }, { url: 'https://tabelog.com/tw/tokyo/A1311/A131106/13003564/', label: '食べログ介紹' }]},
+  'ueno-zoo': {
+    tag: 'ATTRACTION', title: '上野動物園', subtitle: '1882 年日本最古老動物園',
+    image: IMAGES['ueno-zoo'], coords: [35.716015, 139.772882],
+    quick: [['票價','¥600'],['停留','2 小時'],['面積','14.3 公頃']],
+    intro: '1882 年開園、日本最古老動物園。飼育 350 種動物。鯨頭鸛、指猴等台灣完全看不到的稀有動物是亮點。',
+    sections: [
+      { title: '5 大必看', items: ['<strong>1. 北極熊+海豹館（東園）</strong>水下視角', '<strong>2. 鯨頭鸛（西園）</strong>全世界僅 40-50 隻', '<strong>3. 企鵝舍（西園）</strong>順路看', '<strong>4. 指猴之森（西園）</strong>上野獨家、夜行性禁拍照', '<strong>5. 兔猻（西園小獸館）</strong>網紅必拍'] },
+      { title: '參觀技巧', items: ['事前線上購票免排隊', '建議路線：表門入→東園→單軌→西園→弁天門出', '貓熊（東園）排隊極長、本次跳過'] }
+    ],
+    warnings: ['指猴館禁止拍照', '5/17 週日人潮多、建議 9:30 開園即入'],
+    links: [{ url: 'https://www.tokyo-zoo.net/zoo/ueno/', label: '官方網站' }]
+  },
+  'ameyoko': {
+    tag: 'FOOD', title: '阿美橫町', subtitle: 'Ameya Yokocho',
+    image: IMAGES['ameyoko'], coords: [35.709003, 139.774626],
+    quick: [['距上野站','5 分'],['店家','400+'],['預算','¥1,500–2,500']],
+    intro: '位於 JR 上野站旁的傳奇市場街，戰後黑市起家，至今保留昭和氛圍。海鮮、藥妝、平價衣物、美食小吃應有盡有。',
+    sections: [
+      { title: '推薦午餐', items: ['<strong>三浦三崎港</strong>迴轉壽司：鮪魚 5 貫拼盤 ¥1,188', '<strong>Negishi 牛舌</strong>：厚切雪花牛舌 ¥2,000–2,500', '<strong>みなとや</strong>：鐵火丼 ¥500（晚來吃不到）', '<strong>名代宇奈とと</strong>平價鰻魚飯：¥590 起'] }
+    ],
+    warnings: ['11:30 前抵達不用排隊', '人潮極多、貴重物品放胸前包']
+ , links: [{ url: 'https://www.ameyoko.net/', label: '阿美橫町商店街官方' }, { url: 'https://www.negishi.co.jp/', label: 'Negishi 牛舌官方' }, { url: 'https://miura-misakikou.com/', label: '三浦三崎港迴轉壽司' }] },
+  'sanja': {
+    tag: 'FESTIVAL', title: '三社祭 · 淺草', subtitle: '東京下町三大祭',
+    image: IMAGES['sanja'], coords: [35.711116, 139.796366],
+    quick: [['日期','5/17 最終日'],['人潮','60–80 萬'],['歷史','1312 年起']],
+    intro: '東京下町三大祭典之首，每年五月第三個週末舉行。5/17 是最終日，三基本社神輿從淺草神社出發、繞境淺草各町、傍晚返社，是祭典最高潮。',
+    sections: [
+      { title: '5/17 關鍵時刻', items: ['<strong>06:00 宮出</strong>：3 基本社神輿出發', '<strong>13:30–16:30 本社神輿渡御</strong>：你會碰到', '<strong>18:00–20:00 宮入</strong>：神輿返社最高潮（你已在晴空塔）'] },
+      { title: '拍攝重點', items: ['雷門前神輿穿越（經典構圖）', '仲見世通商店街+神輿', '吾妻橋頭+神輿+晴空塔同框'] }
+    ],
+    warnings: ['預估單日 60–80 萬人、慎防扒手', '走失點：先約定雷門前'],
+    links: [{ url: 'https://www.sanjasama.jp/', label: '即時神輿位置' }]
+  },
+  'skytree': {
+    tag: 'LANDMARK', title: '東京晴空塔', subtitle: 'Tokyo Skytree · 634m',
+    image: IMAGES['skytree'], coords: [35.710063, 139.8107],
+    quick: [['票價','¥3,500–4,000'],['高度','634m'],['類型','展望台+商場']],
+    intro: '高 634 公尺的世界第二高塔，2012 年啟用。設有 350F 天望甲板與 450F 天望迴廊，可俯瞰整個關東平原。',
+    sections: [
+      { title: '觀景安排', items: ['<strong>17:00 入場最佳</strong>：可看夕陽轉夜景', '<strong>套票</strong>：350F+450F 約 ¥3,500–4,000', '日落 5/17 約 18:40'] },
+      { title: '購票技巧', items: ['<strong>事前 KKday/Klook 購買電子票</strong>省 ¥200–300', '免排隊、直接掃碼進場'] }
+    ],
+    warnings: ['天氣預報雲量 70% 以上、考慮取消', '禁止使用三腳架'],
+    links: [{ url: 'https://www.tokyo-skytree.jp/cn_t/', label: '官方中文' }]
+  },
+  'solamachi': {
+    tag: 'SHOPPING', title: 'Tokyo Solamachi', subtitle: '晴空塔下方商場',
+    coords: [35.710233, 139.811575],
+    quick: [['店家','300+'],['樓層','B3-7F'],['預算','¥1,500–3,000']],
+    intro: '晴空塔基座的大型商場，集合餐廳、雜貨、藥妝、伴手禮等 300 家店。',
+    sections: [
+      { title: '晚餐推薦', items: ['<strong>鼎泰豐</strong>（6F）：經典小籠包', '<strong>6F 美食街</strong>：拉麵、丼飯、定食多家', '<strong>江戶小路</strong>：和食街、壽司、天婦羅'] }
+    ],
+    warnings: ['週末晚餐建議 18:00 前進場']
+ , links: [{ url: 'https://www.tokyo-solamachi.jp/tcn/', label: 'Tokyo Solamachi 中文官方' }, { url: 'https://www.dintaifung.com.tw/store/JP_skytree.htm', label: '鼎泰豐晴空塔店' }] },
+  'yaesu-bus': {
+    tag: 'TRANSPORT', title: '東京八重洲巴士總站', subtitle: '東京-木更津線',
+    coords: [35.679347, 139.768877],
+    quick: [['距東京站','地下 5 分'],['票價','¥1,400'],['預約','不需要']],
+    intro: '位於東京站八重洲口地下的高速巴士總站，往龍宮城方向採「東京-木更津」路線。不需事前預約，現場排隊上車。',
+    sections: [
+      { title: '5/18 推薦班次', items: ['<strong>09:00 → 09:55</strong>（強推）', '08:30 → 09:25（次選）', '09:30 → 10:25', '10:00 → 10:55'] },
+      { title: '搭乘流程', items: ['東京站丸之內口出站', '走地下通道往八重洲方向', '尋找「東京-木更津」路線標示', '車頭顯示「龍宮城」或「木更津駅」皆可', '下車刷 IC 卡'] }
+    ],
+    warnings: ['5/18 週一請看「平日時刻表」'],
+    links: [{ url: 'https://www.keiseibus.co.jp/kousoku/timetable.php?id=38', label: '官方時刻表' }]
+  },
+  'ryugujo': {
+    tag: 'HOTEL', title: '龍宮城三日月', subtitle: 'Ryugujo Hotel Mikazuki',
+    image: IMAGES['ryugujo'], coords: [35.420882, 139.897597],
+    quick: [['Check-in','15:00'],['溫泉','11:00 起'],['風格','東方仙境']],
+    intro: '位於千葉縣木更津的大型溫泉度假飯店，主題為「龍宮城」傳說。設有黃金風呂、純鉑金風呂等特殊溫泉。',
+    sections: [
+      { title: '必玩設施', items: ['<strong>黃金風呂</strong> ⭐⭐⭐：50 公斤純金', '<strong>純鉑金風呂</strong>：富士見亭住客限定', '<strong>露天溫泉看富士山</strong>：傍晚最美', '<strong>蟹腳吃到飽</strong> ⭐⭐⭐：90 分鐘必吃'] }
+    ],
+    warnings: ['自備泳衣、防水袋', '飯店毛巾、浴衣都有提供']
+ , links: [{ url: 'https://www.mikazuki.co.jp/ryugu/', label: '龍宮城三日月 官方' }, { url: 'https://www.booking.com/hotel/jp/ryuguujou-spahotel-mikazuki.zh-tw.html', label: 'Booking.com 訂房' }] },
+  'tokyo-station': {
+    tag: 'LANDMARK', title: '東京站丸之內紅磚站體', subtitle: '1914 年國家文化財',
+    image: IMAGES['tokyo-station'], coords: [35.68156, 139.765477],
+    quick: [['完工','1914'],['設計','辰野金吾'],['修復','2012']],
+    intro: '1914 年由「日本近代建築之父」辰野金吾設計，以英國紅磚維多利亞風格建造。2012 年完成全面復原工程，恢復原始三層塔樓。',
+    sections: [
+      { title: '建築亮點', items: ['<strong>南北圓頂內裝</strong>：必看、八角形浮雕', '<strong>紅磚外觀</strong>：採用日本國產紅磚', '<strong>國家重要文化財</strong>'] }
+    ],
+    warnings: ['黃昏拍攝光線最美', '南北圓頂在驗票口外、不用車票']
+ , links: [{ url: 'https://www.tokyostationcity.com/', label: '東京站官方' }, { url: 'https://www.tokyostationhotel.jp/about/history/', label: '東京站丸之內站體歷史' }] },
+  'kitte': {
+    tag: 'LANDMARK', title: 'KITTE 屋頂花園', subtitle: '舊郵便局改建',
+    coords: [35.679534, 139.765445],
+    quick: [['樓層','1F-6F'],['屋頂','6F'],['費用','免費']],
+    intro: 'KITTE 是 2013 年由舊東京中央郵便局改建的大型商場。6 樓的 KITTE GARDEN 是免費屋頂觀景台，能俯瞰東京站紅磚站體全景。',
+    sections: [
+      { title: '亮點', items: ['<strong>KITTE GARDEN（6F）</strong>：免費、俯瞰東京站', '<strong>1F 舊郵便局長室</strong>：保留歷史展示空間', '<strong>JP 中央吹拔</strong>：建築師隈研吾設計'] }
+    ],
+    warnings: ['23:00 後關閉', '雨天可能關閉']
+ , links: [{ url: 'https://www.kitte.jp/', label: 'KITTE 官方' }, { url: 'https://www.kitte.jp/feature/garden/', label: 'KITTE Garden 屋頂介紹' }] },
+  'yanaka': {
+    tag: 'AREA', title: '谷中銀座', subtitle: 'Yanaka Ginza · 昭和下町',
+    image: IMAGES['yanaka'], coords: [35.727693, 139.765723],
+    quick: [['距日暮里站','5 分'],['店家','70+'],['氛圍','昭和']],
+    intro: '東京少數保留昭和時代氛圍的下町商店街，木造建築、人情味濃厚。免於戰爭與震災破壞，建築與文化原汁原味保留。',
+    sections: [
+      { title: '5 家必訪', items: ['<strong>夕燒臺階</strong>：商店街入口', '<strong>Kayaba Coffee</strong>（1938）：昭和喫茶', '<strong>肉のすずき</strong>：炸肉餅排隊店、邊走邊吃', '<strong>菊見せんべい</strong>（1875）：傳統手燒煎餅', '<strong>谷中堂</strong>：日本唯一手繪招財貓'] }
+    ],
+    warnings: ['週日商店街最熱鬧', '部分老店週一店休']
+ , links: [{ url: 'https://www.yanakaginza.com/', label: '谷中銀座商店街官方' }, { url: 'https://taireki.com/kayaba/', label: 'Kayaba Coffee 官方' }, { url: 'https://yanakado.com/', label: '谷中堂招財貓店' }] },
+  'azabudai': {
+    tag: 'LANDMARK', title: '麻布台之丘', subtitle: 'Azabudai Hills · 2023 開幕',
+    image: IMAGES['azabudai'], coords: [35.661545, 139.74083],
+    quick: [['開幕','2023.11'],['高度','325m'],['設計','Heatherwick']],
+    intro: '東京最新地標、2023 年 11 月開幕。日本最高樓「森 JP 塔」325 公尺。中央廣場由英國 Heatherwick Studio 設計。',
+    sections: [
+      { title: '亮點', items: ['<strong>中央廣場+花園</strong>：5 月玫瑰盛開', '<strong>森 JP 塔 33F 展望</strong>：免費', '<strong>teamLab Borderless</strong>（地下）', '<strong>OVERTURE Café</strong>：陳列千件藝術品'] }
+    ],
+    warnings: ['33F 展望黃昏 16:30–18:00 最美']
+ , links: [{ url: 'https://www.azabudai-hills.com/tc/', label: '麻布台之丘 中文官方' }, { url: 'https://www.azabudai-hills.com/tc/about/azabudaihillsmarket.html', label: '麻布台 Hills Market 美食' }] },
+  'teamlab': {
+    tag: 'ATTRACTION', title: 'teamLab Borderless 麻布台', subtitle: '沉浸式藝術 2024 新版',
+    image: IMAGES['teamlab'], coords: [35.662069, 139.743267],
+    quick: [['票價','¥3,800'],['停留','2 小時'],['預約','建議']],
+    intro: 'teamLab 沉浸式數位藝術旗艦館，2024 年從台場搬到麻布台之丘。藝術品會在空間中移動、互動、變化。',
+    sections: [
+      { title: '藝術區塊', items: ['<strong>Forest of Lamps</strong>：水晶吊燈森林', '<strong>無重力森林</strong>：漂浮藝術品', '<strong>Crystal Universe</strong>：互動式星空', '<strong>EN Tea House</strong>：茶碗中綻放花朵'] },
+      { title: '參觀技巧', items: ['<strong>事前 KKday 預約 14:30 場</strong>', '建議穿淺色衣服', '禁止三腳架、自拍棒'] }
+    ],
+    warnings: ['部分區域有閃光、光敏感體質慎入'],
+    links: [{ url: 'https://www.teamlab.art/jp/e/borderless-azabudai/', label: '官方網站' }]
+  },
+  'mori-jp': {
+    tag: 'LANDMARK', title: '森 JP 塔 33F', subtitle: '日本最高樓觀景免費',
+    coords: [35.661215, 139.740616],
+    quick: [['高度','325m'],['樓層','33F'],['費用','免費']],
+    intro: '麻布台之丘的核心建築「森 JP 塔」高 325 公尺，是日本第一高樓。33F 為免費公共空間。',
+    sections: [
+      { title: '亮點', items: ['<strong>免費</strong>、不用門票、不用預約', '<strong>33F 360 度全景</strong>', '東京鐵塔+晴空塔同框', '晴天可看富士山'] }
+    ],
+    warnings: ['週末人潮多']
+ , links: [{ url: 'https://www.azabudai-hills.com/tc/about/skylobby.html', label: '森 JP 塔 Sky Lobby 介紹' }] },
+  'shinjuku-bus': {
+    tag: 'TRANSPORT', title: '新宿 → 富士芝櫻祭直行便', subtitle: '富士急行高速巴士',
+    coords: [35.688518, 139.700742],
+    quick: [['車程','1.75 小時'],['票價','¥2,200'],['預約','必須']],
+    intro: '富士急行運行的新宿直達富士芝櫻祭會場班次，每年 4–5 月限定。BUSTA 新宿出發、不繞河口湖、直接抵達會場。',
+    sections: [
+      { title: '搭乘要點', items: ['出發：BUSTA 新宿（JR 新宿南口）4F', '抵達：富士本栖湖渡假村（會場內）', '車程：1.75 小時', '票價：¥2,200（單程）'] }
+    ],
+    warnings: ['必須事前預約 highway-buses.jp', '逾時不候、提前 15 分到 BUSTA'], links: [{ url: 'https://www.highwaybus.com/gp/inbound/inbTimeTbl?lineId=110&upDownKbn=2&action=c', label: '富士急高速巴士預約' }, { url: 'https://shinjuku-busterminal.co.jp/', label: 'BUSTA 新宿巴士總站' }]
+  },
+  'shibazakura': {
+    tag: 'FESTIVAL', title: '富士芝櫻祭', subtitle: '首都圏最大芝櫻祭',
+    image: IMAGES['shibazakura'], coords: [35.442287, 138.603023],
+    quick: [['期間','4/11–5/24'],['規模','50 萬株'],['面積','1.5 公頃']],
+    intro: '首都圏最大規模芝櫻祭典，50 萬株芝櫻鋪成粉紅花海，背景為富士山，是日本「絕景」票選常勝軍。',
+    sections: [
+      { title: '會場亮點', items: ['<strong>主會場</strong>：50 萬株芝櫻+富士山', '<strong>展望台</strong>：高處看花田全景', '<strong>美食街</strong>：限定富士山飯糰'] },
+      { title: '攝影技巧', items: ['<strong>上午光線最佳</strong>：富士山雲量少', '低角度拍攝強調花海', '展望台可拍全景'] }
+    ],
+    warnings: ['花期受天氣影響', '會場無遮蔽物、防曬必備'],
+    links: [{ url: 'https://www.shibazakura.jp/', label: '官方網站' }]
+  },
+  'ensoleille': {
+    tag: 'ATTRACTION', title: '河口湖觀光船 Ensoleille', subtitle: 'アンソレイユ号',
+    image: IMAGES['ensoleille'], coords: [35.503749, 138.770526],
+    quick: [['航程','30 分'],['大人','¥1,000'],['兒童','¥500']],
+    intro: '河口湖最大觀光船，繞行湖中一周約 30 分鐘。船身仿中世紀帆船，分上下兩層，上甲板可 360 度欣賞富士山。',
+    sections: [
+      { title: '航程亮點', items: ['<strong>富士山正面景觀</strong>（晴天）', '<strong>河口湖大橋</strong>近距離拍攝', '<strong>產屋ヶ崎</strong>逆富士拍攝點', '<strong>湖畔別墅群</strong>歐式建築'] },
+      { title: '搭乘要點', items: ['起點：河口湖站步行 5 分', '<strong>持周遊券享 9 折</strong>', '5–10 月每 30 分鐘一班', '最後一班約 16:30'] }
+    ],
+    warnings: ['風大時上甲板冷、備外套', '雨天會減班']
+  , links: [{ url: 'https://www.fujigokokisen.jp/', label: '河口湖觀光船 官方' }, { url: 'https://www.fujigokokisen.jp/cruise/', label: 'Ensoleille 號介紹' }]},
+  'kawaguchiko-bridge': {
+    tag: 'LANDMARK', title: '河口湖大橋', subtitle: 'Kawaguchiko Ohashi',
+    coords: [35.511533, 138.764384],
+    quick: [['長度','500m'],['費用','免費'],['停留','30 分']],
+    intro: '橫跨河口湖南北兩岸的紅色大橋，是河口湖象徵之一。可步行通過，沿途可拍富士山+河口湖+大橋三元素。',
+    sections: [
+      { title: '亮點', items: ['<strong>富士山+大橋同框拍攝</strong>', '<strong>步道平坦</strong>適合輕鬆散步', '<strong>湖畔自然生活館</strong>近在咫尺'] }
+    ],
+    warnings: ['橋上有汽車、靠步道走']
+ , links: [{ url: 'https://www.fujisan.ne.jp/pages/396/', label: '河口湖觀光導覽' }] },
+  'mystays-fuji': {
+    tag: 'HOTEL', title: 'MYSTAYS 富士山展望温泉', subtitle: 'Hotel Mystays Fuji Onsen Resort',
+    coords: [35.491846, 138.780072],
+    quick: [['Check-in','15:00'],['Check-out','11:00'],['距富士急ハイランド','5 分']],
+    intro: 'MYSTAYS 品牌首間度假飯店，位於富士吉田市新倉地區。最大特色是頂樓（7F）天然溫泉展望大浴場，可一邊泡湯一邊看富士山。',
+    sections: [
+      { title: '飯店設施', items: ['<strong>7F 天然溫泉展望大浴場</strong>：碳酸氯化物泉', '<strong>露天風呂</strong>：山風直吹', 'Refa 蓮蓬頭+Dyson 吹風機', 'Chef\'s Recipe 自助餐廳'] },
+      { title: '位置便利性', items: ['<strong>距富士急ハイランド站 5 分</strong>', '<strong>距河口湖站 16 分 / 1 站電車</strong>', '<strong>距新倉山 2.3 km</strong>（D7 早上 UBER 8 分）'] }
+    ],
+    warnings: ['Check-in 15:00 嚴格', '部分客房富士山視角被擋']
+  , links: [{ url: 'https://www.mystays.com/zh-tw/hotel-mystays-fuji-onsen-resort-yamanashi/', label: 'MYSTAYS 富士山展望 官方' }, { url: 'https://www.booking.com/hotel/jp/mystays-fuji-onsen-resort.zh-tw.html', label: 'Booking.com 訂房' }]},
+  'oishi': {
+    tag: 'ATTRACTION', title: '大石公園', subtitle: 'Oishi Park',
+    image: IMAGES['oishi'], coords: [35.522904, 138.745752],
+    quick: [['停留','1.5 小時'],['費用','免費'],['距河口湖站','紅線 25 分']],
+    intro: '河口湖北岸的湖畔公園，350 公尺花道種植 90 多種花。最大特色是「富士山+花海+河口湖」三元素同框。',
+    sections: [
+      { title: '5 月花況', items: ['<strong>粉蝶花</strong>（4 月底–5 月中）：尾聲', '玫瑰開始綻放', '繡球花含苞', '草坪新綠'] },
+      { title: '亮點', items: ['<strong>富士山+花海+河口湖</strong>三元素', '<strong>自然生活館</strong>：複合工房+咖啡廳'] }
+    ],
+    warnings: ['5 月薰衣草尚未開花（6 月底起）', '富士山雲量是關鍵']
+  , links: [{ url: 'https://www.fujisan.ne.jp/pages/426/', label: '大石公園官方' }, { url: 'https://kawaguchiko-natural-living.business.site/', label: '河口湖自然生活館' }]},
+  'orgel': {
+    tag: 'ATTRACTION', title: '河口湖音樂盒之森', subtitle: 'Forest of Music Boxes',
+    image: IMAGES['orgel'], coords: [35.522419, 138.768715],
+    quick: [['票價','¥1,800'],['停留','2 小時'],['距大石公園','5 分']],
+    intro: '河口湖北岸的歐風美術館，主題為自動演奏樂器與音樂盒。建築仿歐洲中世紀城堡與街景，每 30 分鐘有自動樂器演奏。',
+    sections: [
+      { title: '亮點', items: ['<strong>自動演奏樂器</strong>每 30 分鐘演奏', '<strong>世界最大舞蹈管風琴</strong>', '<strong>歐風玫瑰園</strong>（5 月盛開）', '<strong>建築本身打卡</strong>', '<strong>館內咖啡廳</strong>：午餐方便'] }
+    ],
+    warnings: ['週末人潮多'], links: [{ url: 'https://kawaguchikomusicforest.jp/', label: '音樂盒之森 官方' }, { url: 'https://kawaguchikomusicforest.jp/event/', label: '演奏時刻表' }]
+  },
+  'tenjozan': {
+    tag: 'ATTRACTION', title: '天上山纜車', subtitle: 'Mt.Fuji Panoramic Ropeway',
+    coords: [35.503576, 138.777],
+    quick: [['票價','¥1,000'],['乘車','3 分'],['持周遊券','免費']],
+    intro: '河口湖南岸的纜車，3 分鐘抵達標高 1,075m 的山頂，可俯瞰整個河口湖+富士山全景。',
+    sections: [
+      { title: '亮點', items: ['<strong>3 分鐘抵山頂</strong>標高 1,075m', '<strong>俯瞰河口湖+富士山</strong>全景', '<strong>太宰治記念館</strong>', '<strong>兔子主題公園</strong>'] }
+    ],
+    warnings: ['天氣不佳停駛', '山頂風大、備外套'], links: [{ url: 'https://www.mtfujiropeway.jp/', label: '天上山纜車 官方' }, { url: 'https://www.mtfujiropeway.jp/news/', label: '營運狀況即時資訊' }]
+  },
+  'uber-fuji': {
+    tag: 'TRANSPORT', title: 'UBER 富士河口湖町', subtitle: '2025 年 9 月開通',
+    coords: [35.491846, 138.780072],
+    quick: [['類型','App 叫車'],['付款','信用卡'],['語言','中文']],
+    intro: 'UBER 在 2025 年 9 月開始於山梨縣富士河口湖町、富士吉田市等地提供服務。',
+    sections: [
+      { title: '使用方式', items: ['App 開啟、設定起終點', '選擇 UBER Taxi', '等待司機接單（5–10 分）', '上車、自動扣款'] },
+      { title: '4 人費用', items: ['飯店 → 新倉山入口：約 ¥1,500–2,000', '4 人分攤：每人 ¥400–500', '比一般計程車便宜', '比富士急行+步行省 30 分'] }
+    ],
+    warnings: ['08:25 開始打開 App', '叫不到車：步行 5 分到富士急ハイランド搭電車']
+  , links: [{ url: 'https://www.uber.com/jp/ja/ride/', label: 'UBER 山梨服務介紹' }, { url: 'https://apps.apple.com/jp/app/uber/id368677368', label: 'UBER App 下載' }]},
+  'arakurayama': {
+    tag: 'LANDMARK', title: '新倉山淺間公園', subtitle: '富士山+五重塔經典構圖',
+    image: IMAGES['arakurayama'], coords: [35.501391, 138.801631],
+    quick: [['票價','免費'],['停留','2.5 小時'],['階梯','398 階']],
+    intro: '富士吉田市的山中公園，標高 650m，是日本最知名的「富士山+五重塔」拍攝聖地。被多家國際媒體選為「日本最美風景」。',
+    sections: [
+      { title: '攻頂路線', items: ['新倉山入口→新倉富士淺間神社（10 分）', '神社→中段櫻花觀景台（10 分）', '櫻花觀景台→<strong>咲くや姫展望デッキ</strong>頂端（5 分）', '總計 398 階梯、約 25 分鐘攻頂'] },
+      { title: '拍攝重點', items: ['<strong>忠靈塔（五重塔）+富士山+城市</strong>三層構圖', '<strong>5 月新綠</strong>最美', '上午光線最佳（東向順光）'] }
+    ],
+    warnings: ['398 階梯需 25 分、穿好走鞋', '富士山雲量是關鍵']
+  , links: [{ url: 'https://www.city.fujiyoshida.yamanashi.jp/forms/info/info.aspx?info_id=21307', label: '新倉山淺間公園官方' }, { url: 'https://www.fujiyoshida.net/spot/4', label: '忠靈塔導覽' }, { url: 'https://www.fujiyoshida.net/sakura/', label: '櫻花情報' }]},
+  'houtou': {
+    tag: 'RAMEN', title: 'ほうとう不動 駅前店', subtitle: '山梨郷土料理',
+    image: IMAGES['houtou'], coords: [35.498861, 138.768655],
+    quick: [['營業','11:00–19:00'],['預算','¥1,200–1,500'],['距河口湖站','正對面']],
+    intro: '山梨縣最知名郷土料理「餺飥（ほうとう）」連鎖店，駅前店位於河口湖站正對面。「餺飥」是山梨在地寬麵+味噌+南瓜山菜。',
+    sections: [
+      { title: '招牌菜', items: ['<strong>不動ほうとう</strong> ¥1,080：太麵+味噌+南瓜+山菜', '<strong>黑糖炊豆皮壽司</strong> ¥432', '<strong>馬肉刺身</strong> ¥1,080：富士吉田名物'] }
+    ],
+    warnings: ['平日 12:00–13:00 高峰、推薦 11:50 抵達', '麵賣完即收店'], links: [{ url: 'http://www.houtou-fudou.jp/', label: 'ほうとう不動 官方' }, { url: 'http://www.houtou-fudou.jp/shop/ekimae.html', label: '駅前店分店資訊' }]
+  },
+  'fujikyu-bus': {
+    tag: 'TRANSPORT', title: '富士急ハイランド → 新宿', subtitle: '高速巴士',
+    coords: [35.484573, 138.776856],
+    quick: [['車程','1.75 小時'],['票價','¥2,200'],['預約','必須']],
+    intro: '富士急行運行的高速巴士，從富士急ハイランド bus stop 直達新宿 BUSTA。班次密集（每 30 分鐘 1 班）。',
+    sections: [
+      { title: '5/22 推薦班次', items: ['<strong>13:38 → 15:15</strong>（強推）', '13:08 → 14:45', '14:08 → 15:45'] },
+      { title: '搭乘要點', items: ['出發：富士急ハイランド bus stop（飯店步行 5 分）', '抵達：BUSTA 新宿（JR 新宿南口 4F）', '<strong>必須事前預約</strong>'] }
+    ],
+    warnings: ['提前 15 分抵達', '塞車時可能延誤'],
+    links: [{ url: 'https://highway-buses.jp/', label: '線上預約' }]
+  },
+  'tocho': {
+    tag: 'LANDMARK', title: '東京都廳觀景台', subtitle: '免費 245m 高',
+    image: IMAGES['tocho'], coords: [35.689733, 139.691656],
+    quick: [['票價','免費'],['高度','245m'],['營業','09:30–22:00']],
+    intro: '位於新宿西口的東京都廳第一本廳舍，45 樓的北展望室開放免費參觀，可 360 度俯瞰新宿。',
+    sections: [
+      { title: '亮點', items: ['<strong>完全免費</strong>、不用門票、不用預約', '<strong>245m 高、360 度全景</strong>', '<strong>晴天可看富士山+晴空塔</strong>', '<strong>北展望室 09:30–22:00</strong>'] }
+    ],
+    warnings: ['排隊高峰可能 30 分', '禁止帶大件行李']
+ , links: [{ url: 'https://www.metro.tokyo.lg.jp/tenbou/index.html', label: '東京都廳展望台 官方' }, { url: 'https://tokyoprojectionmappingproject.jp/', label: 'PROJECTION MAPPING 介紹' }] },
+  'hanazono': {
+    tag: 'FESTIVAL', title: '花園神社例大祭', subtitle: '12 年一遇本祭年',
+    image: IMAGES['hanazono'], coords: [35.693531, 139.705328],
+    quick: [['日期','5/22 宵宮祭'],['人潮','20–30 萬'],['夜店','100+']],
+    intro: '新宿三丁目的花園神社（祀祭三柱稻荷大神）每年五月舉行例大祭。<strong>2026 年正好是「本祭年」</strong>，12 年一遇。',
+    sections: [
+      { title: '2026 祭典時程', items: ['<strong>5/22（五）宵宮祭 18:00–22:00</strong>（你會參與）', '5/23（六）大祭式', '5/24（日）神幸祭神輿渡御'] },
+      { title: '2026 本祭年特色', items: ['<strong>雷電神輿</strong>（本祭年限定）', '<strong>獅子頭</strong>+島田囃子山車為先頭', '比平年更盛大華麗'] },
+      { title: '夜店必吃', items: ['章魚燒 ¥500 ⭐⭐⭐', '雞肉串 ¥300–500/串 ⭐⭐⭐', '大阪燒 ¥500–700 ⭐⭐⭐', '蘋果糖 ¥500 ⭐⭐'] }
+    ],
+    warnings: ['18:00 後人潮極多、慎防扒手', '走失點：正門大鳥居前', '夜店 22:00 收店'],
+    links: [{ url: 'http://hanazono-jinja.or.jp/', label: '神社官方' }]
+  },
+  'keisei-narita': {
+    tag: 'TRANSPORT', title: '京成本線快特', subtitle: 'Keisei Main Line Limited Express',
+    coords: [35.728158, 139.770641],
+    quick: [['車程','59 分'],['票價','¥800'],['類型','自由席']],
+    intro: '京成本線是連接日暮里與成田機場的鐵路，「快特」是最快的免費班次。從日暮里 2 番月台出發、9 站直達京成成田。',
+    sections: [
+      { title: '5/23 推薦班次', items: ['<strong>09:31 日暮里發 → 10:30 京成成田</strong>', '日暮里 2 番月台', '9 站、無轉乘'] }
+    ],
+    warnings: ['週末 09:00 有大量旅客、提前進站']
+ , links: [{ url: 'https://www.keisei.co.jp/keisei/tetudou/skyliner/tc/', label: '京成電鐵 中文官方' }, { url: 'https://norikae.keisei.co.jp/', label: '時刻表查詢' }] },
+  'sawara-eel': {
+    tag: 'FOOD', title: '佐原鰻魚老街午餐', subtitle: 'Sawara Eel Lunch',
+    image: IMAGES['sawara'], coords: [35.888445, 140.498017],
+    quick: [['預算','¥2,500–3,000'],['停留','75 分'],['老店','300 年']],
+    intro: '佐原是江戶時代水運要鎮，鰻魚料理保留 300 年傳統。老街沿小野川兩岸，木造老建築改建的鰻魚店、蕎麥麵店林立。',
+    sections: [
+      { title: '推薦老店', items: ['<strong>千葉屋</strong>：佐原鰻魚老店', '<strong>長谷川</strong>：100 年老店', '<strong>小堀屋</strong>：百年蕎麥麵', '<strong>植田屋</strong>：江戶時代和菓子'] }
+    ],
+    warnings: ['週六中午 12:00–13:00 高峰', '只收現金']
+ , links: [{ url: 'https://www.city.katori.lg.jp/sightseeing/', label: '佐原觀光協會官方' }, { url: 'https://tabelog.com/tw/chiba/A1204/A120401/12000098/', label: '千葉屋 食べログ' }, { url: 'https://tabelog.com/tw/chiba/A1204/A120401/12001002/', label: '長谷川 食べログ' }] },
+  'onogawa': {
+    tag: 'ATTRACTION', title: '小野川遊船', subtitle: 'Onogawa Boat Tour',
+    image: IMAGES['sawara'], coords: [35.889182, 140.498164],
+    quick: [['航程','30 分'],['票價','¥1,300'],['類型','日本音風景百選']],
+    intro: '佐原小野川是江戶時代水運命脈，遊船 30 分鐘繞行兩岸。「樋橋落水秀」被選為「日本音風景百選」。',
+    sections: [
+      { title: '航程亮點', items: ['<strong>樋橋落水秀</strong>：日本音風景百選', '<strong>伊能忠敬舊宅前</strong>登船', '<strong>江戶時代老建築</strong>沿岸'] }
+    ],
+    warnings: ['週末班次密集、平日減班']
+ , links: [{ url: 'https://www.suigo-sawara.ne.jp/', label: '小野川遊船 官方' }, { url: 'https://www.suigo-sawara.ne.jp/access/', label: '遊船時刻 / 票價' }] },
+  'naritasan': {
+    tag: 'TEMPLE', title: '成田新勝寺', subtitle: '1080 年千年古剎',
+    image: IMAGES['naritasan'], coords: [35.786051, 140.318249],
+    quick: [['創建','940 年'],['費用','免費'],['停留','2 小時']],
+    intro: '940 年由寬朝大僧正創建、1080 多年歷史的真言宗智山派大本山。本尊「不動明王」傳為弘法大師親自雕刻。每年參拜人數達 1,000 萬。',
+    sections: [
+      { title: '3 大重要文化財', items: ['<strong>仁王門</strong>（1830）：江戶仁王像', '<strong>三重塔</strong>（1712）：彩繪精緻', '<strong>釋迦堂</strong>（1858）：精緻木雕'] },
+      { title: '2 小時規劃', items: ['16:00–16:30 仁王門+大本堂參拜', '16:30–17:00 三重塔+光明堂+釋迦堂', '17:00–17:30 表參道散步'] }
+    ],
+    warnings: ['週末人潮較多但不擠'],
+    links: [{ url: 'https://www.naritasan.or.jp/', label: '官方網站' }]
+  },
+  'aeon-narita': {
+    tag: 'SHOPPING', title: 'AEON 成田', subtitle: '回國前最後採買',
+    coords: [35.795575, 140.318706],
+    quick: [['店家','200+'],['預算','彈性'],['類型','購物中心']],
+    intro: '成田機場附近的大型 AEON 購物中心，是回國前最後採買的最佳地方。',
+    sections: [
+      { title: '採買重點', items: ['<strong>伴手禮</strong>：白色戀人、Royce', '<strong>零食</strong>：KitKat、薯條三兄弟', '<strong>藥妝</strong>：曼秀雷敦、休足時間', '<strong>調味料</strong>：日式咖哩塊、味噌'] }
+    ],
+    warnings: ['週六傍晚人潮多', '退稅櫃台 19:00 可能關閉']
+ , links: [{ url: 'https://narita-aeonmall.com/', label: 'AEON Mall 成田 官方' }, { url: 'https://narita-aeonmall.com/static/detail/taxfree-tw', label: '退稅服務介紹' }] },
+  'ino-tadataka': {
+    tag: 'CULTURE', title: '伊能忠敬舊宅', subtitle: '日本第一張全國地圖測繪家',
+    coords: [35.88812, 140.498095],
+    quick: [['費用','免費'],['停留','30 分'],['類型','國家史蹟']],
+    intro: '伊能忠敬（1745–1818）是江戶時代測量家，55 歲開始學測量、自費走遍日本繪製《大日本沿海輿地全圖》。',
+    sections: [
+      { title: '亮點', items: ['<strong>江戶商人住宅</strong>原貌保留', '<strong>地圖製作工具</strong>展示', '<strong>測量儀器</strong>復原品'] }
+    ],
+    warnings: ['週一休館', '室內禁拍照']
+ , links: [{ url: 'https://www.city.katori.lg.jp/sightseeing/museum/inoh/', label: '伊能忠敬記念館 官方' }, { url: 'https://www.city.katori.lg.jp/sightseeing/spot/sawara/inoh.html', label: '伊能忠敬舊宅介紹' }] },
+  'mitsubishi': {
+    tag: 'LANDMARK', title: '佐原三菱館', subtitle: '1914 大正紅磚銀行',
+    coords: [35.888489, 140.498936],
+    quick: [['完工','1914'],['費用','免費'],['類型','建築']],
+    intro: '1914 年（大正 3 年）建造的紅磚銀行建築，原為三菱銀行佐原支店。保留大正時代旋轉樓梯與金庫。',
+    sections: [
+      { title: '亮點', items: ['<strong>大正紅磚建築</strong>原貌保留', '<strong>旋轉樓梯</strong>是亮點', '<strong>原金庫室</strong>展示空間'] }
+    ],
+    warnings: ['週末閉館較早（17:00）']
+  , links: [{ url: 'https://www.city.katori.lg.jp/sightseeing/spot/sawara/mitsubishi.html', label: '佐原三菱館介紹' }]}
+};
+
+// ============================================================
+// DAYS DATA
+// ============================================================
+const DAYS_DATA = [
+  { day: 1, date: '5/16 SAT', dateISO: '2026-05-16', title: '抵達日 + 日暮里下町序曲', intensity: '低', luggage: '隨身行李', estBudget: 3911,
+    timeline: [
+      { time: '12:45', title: '桃園起飛 JL8664', detail: '波音 767 經濟艙含餐點', clickable: false, links: [{ url: 'https://www.city.katori.lg.jp/sightseeing/spot/sawara/mitsubishi.html', label: '佐原三菱館介紹' }] },
+      { time: '17:15', title: '抵達 NRT 成田機場 T2', detail: '日系航空通關較順', clickable: false },
+      { time: '18:10', sub: '40分', spotId: 'skyliner', highlight: true, cost: '¥2,580' },
+      { time: '18:50', spotId: 'mystays-nippori', overrideTitle: '日暮里 → MYSTAYS 入住', overrideDetail: '西口出站、步行 5 分' },
+      { time: '19:30', spotId: 'yuyakedandan', overrideTitle: '夕燒臺階+谷中銀座入口', overrideDetail: '東京下町地標' },
+      { time: '20:30', spotId: 'bazoku', highlight: true, overrideTitle: '🍜 馬賊 手打拉麵', overrideDetail: '1992 年創業排隊名店', cost: '¥1,200–1,500' },
+      { time: '21:30', spotId: 'habutae', overrideTitle: '羽二重糰子外帶', overrideDetail: '1819 年江戶老舖', cost: '¥600–800' }
+    ]
+  },
+  { day: 2, date: '5/17 SUN', dateISO: '2026-05-17', title: '東京下町日 + 三社祭 + 晴空塔', intensity: '高', luggage: '寄放大行李', estBudget: 7911,
+    timeline: [
+      { time: '09:30', sub: '2小時', spotId: 'ueno-zoo', highlight: true, overrideTitle: '🐧 上野動物園精華', overrideDetail: '北極熊→鯨頭鸛→兔猻', cost: '¥600' },
+      { time: '12:00', spotId: 'ameyoko', overrideTitle: '阿美橫町午餐', overrideDetail: '三浦三崎港 OR Negishi 牛舌', cost: '¥1,500–2,500' },
+      { time: '13:30', sub: '2小時', spotId: 'sanja', highlight: true, overrideTitle: '🏮 雷門+三社祭', overrideDetail: '神輿穿越雷門經典構圖' },
+      { time: '17:00', sub: '日落 18:40', spotId: 'skytree', highlight: true, overrideTitle: '🗼 晴空塔展望台', overrideDetail: '350F+450F 套票', cost: '¥3,500–4,000' },
+      { time: '18:30', spotId: 'solamachi', overrideTitle: 'Solamachi 晚餐', overrideDetail: '塔下方商場', cost: '¥1,500–3,000' }
+    ]
+  },
+  { day: 3, date: '5/18 MON', dateISO: '2026-05-18', title: '龍宮城三日月 溫泉樂園', intensity: '中', luggage: '小包', estBudget: 9800,
+    timeline: [
+      { time: '09:00', sub: '55分', spotId: 'yaesu-bus', highlight: true, overrideTitle: '🚌 八重洲 BT → 龍宮城', overrideDetail: '高速巴士不需預約', cost: '¥1,400' },
+      { time: '10:00', sub: '9小時', spotId: 'ryugujo', highlight: true, overrideTitle: '♨ 龍宮城三日月入住', overrideDetail: '11:00 入溫泉、15:00 客房' },
+      { time: '17:00', title: '露天溫泉看夕陽', detail: '天氣好可眺望富士山', clickable: false },
+      { time: '18:00', sub: '90分', title: '🦀 蟹腳吃到飽自助晚餐', detail: '招牌必吃', clickable: false, highlight: true }
+    ]
+  },
+  { day: 4, date: '5/19 TUE', dateISO: '2026-05-19', title: '東京三面相日：1914→1945→2023', intensity: '中', luggage: '小包全程', estBudget: 7544,
+    timeline: [
+      { time: '11:10', spotId: 'tokyo-station', highlight: true, overrideTitle: '🏛 東京站丸之內紅磚站體', overrideDetail: '1914 辰野金吾設計' },
+      { time: '11:25', spotId: 'kitte', overrideTitle: 'KITTE 6F 屋頂花園', overrideDetail: '舊郵便局改建' },
+      { time: '12:20', sub: '70分', spotId: 'yanaka', highlight: true, overrideTitle: '🏘 谷中銀座午餐+散策', overrideDetail: 'Kayaba+肉のすずき', cost: '¥1,200–2,000' },
+      { time: '14:00', spotId: 'azabudai', overrideTitle: '麻布台之丘中央廣場', overrideDetail: 'Heatherwick 設計' },
+      { time: '14:30', sub: '2小時', spotId: 'teamlab', highlight: true, overrideTitle: '🎨 teamLab Borderless', overrideDetail: '沉浸式藝術 2024 新版', cost: '¥3,800' },
+      { time: '16:30', spotId: 'mori-jp', overrideTitle: '森 JP 塔 33F 展望', overrideDetail: '免費、325m 全景' }
+    ]
+  },
+  { day: 5, date: '5/20 WED', dateISO: '2026-05-20', title: '富士芝櫻祭 + 河口湖觀光船', intensity: '中高', luggage: '小包', estBudget: 9415,
+    timeline: [
+      { time: '08:45', sub: '1.75小時', spotId: 'shinjuku-bus', highlight: true, overrideTitle: '🚌 新宿 → 富士芝櫻祭直行便', overrideDetail: '需事先預約', cost: '¥2,200' },
+      { time: '10:30', sub: '2.5小時', spotId: 'shibazakura', highlight: true, overrideTitle: '🌸 富士芝櫻祭會場', overrideDetail: '50 萬株芝櫻+富士山', cost: '¥1,000' },
+      { time: '14:30', sub: '30分', spotId: 'ensoleille', highlight: true, overrideTitle: '🚢 河口湖觀光船 Ensoleille', overrideDetail: '繞湖、富士山+大橋', cost: '¥1,000' },
+      { time: '15:00', spotId: 'kawaguchiko-bridge', overrideTitle: '湖畔散步+河口湖大橋', overrideDetail: '拍照、自由步調' },
+      { time: '17:30', spotId: 'mystays-fuji', highlight: true, overrideTitle: '♨ MYSTAYS 富士山展望', overrideDetail: '7F 天然碳酸氯化物泉' }
+    ]
+  },
+  { day: 6, date: '5/21 THU', dateISO: '2026-05-21', title: '河口湖深度日', intensity: '中', luggage: '小包', estBudget: 9415,
+    timeline: [
+      { time: '10:00', sub: '1.5小時', spotId: 'oishi', highlight: true, overrideTitle: '🌺 大石公園', overrideDetail: '富士山+花海+河口湖' },
+      { time: '11:35', sub: '2小時', spotId: 'orgel', highlight: true, overrideTitle: '🎵 音樂盒之森+午餐', overrideDetail: '歐風建築+玫瑰園', cost: '¥1,800' },
+      { time: '14:10', sub: '1.5小時', spotId: 'tenjozan', highlight: true, overrideTitle: '🚡 天上山纜車', overrideDetail: '登 1,075m 看富士山', cost: '¥1,000' }
+    ]
+  },
+  { day: 7, date: '5/22 FRI', dateISO: '2026-05-22', title: '新倉山 + 新宿 + 🏮 花園神社', intensity: '中', luggage: '取回大行李', estBudget: 7481,
+    timeline: [
+      { groupTitle: '早晨 ｜ 新倉山攻頂' },
+      { time: '08:30', sub: '8分', spotId: 'uber-fuji', highlight: true, overrideTitle: '🚖 UBER：飯店 → 新倉山', overrideDetail: 'App 叫車', cost: '4 人 ¥400–500/人' },
+      { time: '08:40', sub: '2.5小時', spotId: 'arakurayama', highlight: true, overrideTitle: '🌸 新倉山淺間公園攻頂', overrideDetail: '五重塔+富士山經典' },
+      { groupTitle: '中午 ｜ 河口湖午餐' },
+      { time: '11:40', spotId: 'houtou', highlight: true, overrideTitle: '🍜 ほうとう不動 駅前店', overrideDetail: '山梨郷土餺飥麵', cost: '¥1,200–1,500' },
+      { groupTitle: '下午 ｜ 高速巴士回東京' },
+      { time: '13:38', sub: '1.75小時', spotId: 'fujikyu-bus', highlight: true, overrideTitle: '🚌 富士急ハイランド → 新宿', overrideDetail: '需事前預約', cost: '¥2,200' },
+      { time: '17:15', spotId: 'tocho', overrideTitle: '🌆 東京都廳觀景台', overrideDetail: '免費 245m' },
+      { groupTitle: '夜晚 ｜ 花園神社例大祭' },
+      { time: '18:00', sub: '3小時', spotId: 'hanazono', highlight: true, overrideTitle: '🏮 花園神社例大祭', overrideDetail: '12 年一遇本祭年', cost: '¥1,500–2,500' }
+    ]
+  },
+  { day: 8, date: '5/23 SAT', dateISO: '2026-05-23', title: '佐原 江戶水鄉 + 成田 千年古剎', intensity: '中', luggage: '拖大行李', estBudget: 7598,
+    timeline: [
+      { time: '09:31', sub: '59分', spotId: 'keisei-narita', highlight: true, overrideTitle: '🚆 京成本線快特 → 京成成田', overrideDetail: '2 番月台', cost: '¥800' },
+      { time: '12:00', sub: '75分', spotId: 'sawara-eel', highlight: true, overrideTitle: '🍱 佐原老街午餐（鰻魚）', overrideDetail: '千葉屋、長谷川', cost: '¥2,500–3,000' },
+      { time: '13:15', sub: '30分', spotId: 'onogawa', highlight: true, overrideTitle: '🚣 小野川遊船', overrideDetail: '日本音風景百選', cost: '¥1,300' },
+      { time: '13:45', spotId: 'ino-tadataka', overrideTitle: '伊能忠敬舊宅', overrideDetail: '江戶測量家故居' },
+      { time: '14:15', spotId: 'mitsubishi', overrideTitle: '佐原三菱館', overrideDetail: '1914 大正紅磚銀行' },
+      { time: '16:00', sub: '2小時', spotId: 'naritasan', highlight: true, overrideTitle: '🏯 成田新勝寺+表參道', overrideDetail: '1080 年古剎' },
+      { time: '18:15', sub: '75分', spotId: 'aeon-narita', highlight: true, overrideTitle: '🛍 AEON 成田最後採買', overrideDetail: '伴手禮、零食、藥妝' }
+    ]
+  },
+  { day: 9, date: '5/24 SUN', dateISO: '2026-05-24', title: '回程日 ✈', intensity: '低', luggage: '回家', estBudget: 0,
+    timeline: [
+      { time: '06:55', title: '✈ 成田威可 → T2 報到', detail: '起飛前 2 小時', clickable: false },
+      { time: '08:55', title: 'JL8663 起飛', detail: 'NRT → TPE', clickable: false, highlight: true },
+      { time: '11:35', title: '🏠 抵達桃園', detail: '9 天行程圓滿結束', clickable: false, highlight: true }
+    ]
+  }
+];
+
+// ============================================================
+// EMERGENCY DATA (NEW - 批次 3)
+// ============================================================
+const EMERGENCY_DATA = [
+  {
+    title: '日本緊急號碼',
+    icon: '🚨',
+    items: [
+      { name: '警察', detail: '110（24h）', tel: '110' },
+      { name: '救護車/消防', detail: '119（24h）', tel: '119' },
+      { name: '海上事故', detail: '118', tel: '118' }
+    ]
+  },
+  {
+    title: '駐日台北經濟文化代表處',
+    icon: '🏛',
+    items: [
+      { name: '東京代表處', detail: '03-3280-7811（平日 9:00–17:00）', tel: '+81332807811' },
+      { name: '緊急聯絡（24h）', detail: '+81-3-3280-7917', tel: '+81332807917' },
+      { name: '行動電話', detail: '+81-90-8814-9921', tel: '+819088149921' }
+    ]
+  },
+  {
+    title: '飯店電話（4 間）',
+    icon: '🏨',
+    items: [
+      { name: 'MYSTAYS 日暮里（D1, 2, 4, 7）', detail: '03-3823-1011', tel: '+81338231011' },
+      { name: '龍宮城三日月（D3）', detail: '0438-41-8111', tel: '+81438418111' },
+      { name: 'MYSTAYS 富士山展望（D5, 6）', detail: '0555-22-2200', tel: '+81555222200' },
+      { name: '成田威可飯店（D8）', detail: '0476-22-1110', tel: '+81476221110' }
+    ]
+  },
+  {
+    title: '醫療資源',
+    icon: '🏥',
+    items: [
+      { name: '日本醫療通譯熱線', detail: '03-5285-8181（中文）', tel: '+81352858181' },
+      { name: 'AMDA 國際醫療', detail: '03-6233-9266', tel: '+81362339266' },
+      { name: '東京都醫療諮詢', detail: '03-5272-0303', tel: '+81352720303' }
+    ]
+  },
+  {
+    title: '信用卡掛失（中文/24h）',
+    icon: '💳',
+    items: [
+      { name: 'VISA 全球緊急', detail: '0053-44-0022', tel: '00531440022' },
+      { name: 'MasterCard 全球', detail: '00531-11-3886', tel: '0053111388 6' },
+      { name: 'JCB 海外緊急', detail: '0053-13-3997', tel: '00531133997' },
+      { name: '美國運通台灣', detail: '+886-2-2719-8011', tel: '+886227198011' }
+    ]
+  },
+  {
+    title: '失物招領',
+    icon: '🎒',
+    items: [
+      { name: 'JR 東日本（中文）', detail: '050-2016-1603', tel: '+81502016 1603' },
+      { name: '京成電鐵', detail: '0570-081-160', tel: '+81570081160' },
+      { name: '東京 Metro', detail: '0120-104106', tel: '+81120104106' },
+      { name: '成田機場（T2）', detail: '0476-32-2105', tel: '+81476322105' }
+    ]
+  },
+  {
+    title: '機場航空公司',
+    icon: '✈',
+    items: [
+      { name: '日本航空（成田）', detail: '0476-32-3551', tel: '+81476323551' },
+      { name: '日本航空（中文預約）', detail: '0570-025-031', tel: '+81570025031' },
+      { name: '成田機場諮詢', detail: '0476-34-8000', tel: '+81476348000' }
+    ]
+  }
+];
+
+// ============================================================
+// PACKING LIST (NEW - 批次 3)
+// ============================================================
+const PACKING_DATA = [
+  {
+    category: '出發必備',
+    icon: '🛂',
+    items: [
+      { name: '護照（5/16-5/24 有效）', note: '有效期 6 個月以上' },
+      { name: '機票電子檔', note: '紙本+手機備份' },
+      { name: '日圓現金', note: '建議 ¥50,000–80,000/人' },
+      { name: '信用卡', note: 'VISA/Master 各 1 張' },
+      { name: '健保卡', note: '海外就醫核退用' },
+      { name: '台胞國際駕照', note: '若需要租車' }
+    ]
+  },
+  {
+    category: '電子用品',
+    icon: '🔌',
+    items: [
+      { name: '手機+充電線' },
+      { name: '行動電源', note: '10000mAh 以下登機' },
+      { name: '日本插頭轉接頭', note: '日本是 A 型' },
+      { name: '相機+備用記憶卡' },
+      { name: 'iPad / 電子書' },
+      { name: 'Wi-Fi 分享器或 SIM 卡', note: 'eSIM 最方便' }
+    ]
+  },
+  {
+    category: '衣物（5月東京 12-22°C）',
+    icon: '👕',
+    items: [
+      { name: '短袖 T 恤 × 9', note: '一日一件' },
+      { name: '長袖薄外套 × 2', note: '早晚溫差大' },
+      { name: '薄羽絨/防風外套', note: '富士山區較冷' },
+      { name: '長褲 × 4', note: '舒適好走' },
+      { name: '內衣褲 × 9' },
+      { name: '襪子 × 9', note: '溫泉/神社脫鞋多' },
+      { name: '睡衣' },
+      { name: '泳衣（D3 龍宮城）', note: '玩戲水池必備' }
+    ]
+  },
+  {
+    category: '雨具防曬',
+    icon: '☔',
+    items: [
+      { name: '折疊傘 × 2', note: '5 月東京偶有雨' },
+      { name: '輕便雨衣', note: '應急用' },
+      { name: '防曬乳 SPF50+', note: 'D5–7 富士山區紫外線強' },
+      { name: '太陽眼鏡' },
+      { name: '帽子' }
+    ]
+  },
+  {
+    category: '盥洗用品',
+    icon: '🧴',
+    items: [
+      { name: '牙刷牙膏', note: '日本飯店多自備' },
+      { name: '洗面乳' },
+      { name: '保養品旅行組' },
+      { name: '化妝品' },
+      { name: '隱形眼鏡+藥水' },
+      { name: '生理用品（必要時）' }
+    ]
+  },
+  {
+    category: '醫藥用品',
+    icon: '💊',
+    items: [
+      { name: '個人慢性病藥物' },
+      { name: '感冒藥/退燒藥' },
+      { name: '腸胃藥' },
+      { name: 'OK 繃' },
+      { name: '暈車藥', note: 'D5–7 山路用' },
+      { name: '蚊蟲叮咬藥膏' }
+    ]
+  },
+  {
+    category: '便利小物',
+    icon: '🎒',
+    items: [
+      { name: '小後背包/側背包', note: '當日活動用' },
+      { name: '購物袋/折疊袋', note: '日本超商不送袋' },
+      { name: '夾鏈袋', note: '收納分類' },
+      { name: '面紙/濕紙巾' },
+      { name: '密碼鎖', note: '行李箱用' },
+      { name: '小手電筒' },
+      { name: '兒童用具（9歲）', note: '玩具/書/iPad' }
+    ]
+  },
+  {
+    category: '回程前 (5/23)',
+    icon: '📦',
+    items: [
+      { name: '伴手禮分裝整理' },
+      { name: '退稅單據封袋', note: '機場海關交還' },
+      { name: '託運/手提行李分配' },
+      { name: '隔天早餐買好', note: '飯店便利商店' }
+    ]
+  }
+];
+
+// ============================================================
+// USER DATA STORAGE
+// ============================================================
+const STORAGE_KEY = 'tokyo_trip_user_data_v1';
+const PACKING_STORAGE_KEY = 'tokyo_trip_packing_v1';
+
+function loadUserData() {
+  try { const data = localStorage.getItem(STORAGE_KEY); return data ? JSON.parse(data) : {}; } catch (e) { return {}; }
+}
+
+function saveUserData(data) {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch (e) {}
+}
+
+function loadPackingData() {
+  try { const data = localStorage.getItem(PACKING_STORAGE_KEY); return data ? JSON.parse(data) : {}; } catch (e) { return {}; }
+}
+
+function savePackingData(data) {
+  try { localStorage.setItem(PACKING_STORAGE_KEY, JSON.stringify(data)); } catch (e) {}
+}
+
+let userData = loadUserData();
+let packingData = loadPackingData();
+
+// ============================================================
+// EXPENSE DATA MIGRATION (從舊版單筆 → 新版多筆)
+// ============================================================
+(function migrateOldExpenseData() {
+  let migrated = false;
+  Object.keys(userData).forEach(spotId => {
+    const sd = userData[spotId];
+    // 舊版有 actualCost 但沒有 expenses 陣列
+    if (sd.actualCost && !sd.expenses) {
+      sd.expenses = [{
+        id: Date.now() + Math.random(),
+        amount: parseFloat(sd.actualCost) || 0,
+        currency: sd.currency || 'JPY',
+        category: sd.category || '',
+        payer: sd.payer || '',
+        note: ''
+      }];
+      // 保留舊欄位以防萬一，但加旗標表示已遷移
+      sd._migrated = true;
+      migrated = true;
+    }
+    if (!sd.expenses) sd.expenses = [];
+  });
+  if (migrated) saveUserData(userData);
+})();
+
+// ============================================================
+// CURRENCY & RATES
+// ============================================================
+const RATE_STORAGE_KEY = 'tokyo_trip_rates_v1';
+const DEFAULT_RATES = {
+  JPY: 0.21,
+  USD: 32.0,
+  TWD: 1.0
+};
+
+const currencySymbols = {
+  JPY: '¥',
+  USD: '$',
+  TWD: 'NT$'
+};
+
+const categoryIcons = {
+  transport: '🚆',
+  food: '🍱',
+  ticket: '🎫',
+  hotel: '🏨',
+  shopping: '🛍',
+  cosmetics: '💊',
+  souvenir: '🎁',
+  other: '⚡'
+};
+
+const categoryNames = {
+  transport: '交通',
+  food: '餐飲',
+  ticket: '門票',
+  hotel: '住宿',
+  shopping: '購物',
+  cosmetics: '藥妝',
+  souvenir: '伴手禮',
+  other: '雜支'
+};
+
+const payerIcons = {
+  dad: '👨',
+  wife: '👩',
+  mom: '👵',
+  shared: '👥'
+};
+
+const payerNames = {
+  dad: '爸爸',
+  wife: '老婆',
+  mom: '媽媽',
+  shared: '共付'
+};
+
+function loadRates() {
+  try {
+    const data = localStorage.getItem(RATE_STORAGE_KEY);
+    if (data) {
+      const parsed = JSON.parse(data);
+      return { ...DEFAULT_RATES, ...parsed };
+    }
+    return { ...DEFAULT_RATES };
+  } catch (e) {
+    return { ...DEFAULT_RATES };
+  }
+}
+
+function saveRates(rates) {
+  try {
+    localStorage.setItem(RATE_STORAGE_KEY, JSON.stringify({
+      ...rates,
+      _updatedAt: new Date().toISOString()
+    }));
+  } catch (e) {}
+}
+
+let exchangeRates = loadRates();
+
+function convertToTWD(amount, currency) {
+  const num = parseFloat(amount) || 0;
+  const rate = exchangeRates[currency] || 1;
+  return num * rate;
+}
+
+function setRate(currency, rate) {
+  exchangeRates[currency] = parseFloat(rate) || DEFAULT_RATES[currency];
+  saveRates(exchangeRates);
+  renderAllDaySections();
+  updateAllProgress();
+  updatePayerSummary();
+}
+
+function getRateUpdateTime() {
+  try {
+    const data = localStorage.getItem(RATE_STORAGE_KEY);
+    if (data) {
+      const parsed = JSON.parse(data);
+      if (parsed._updatedAt) {
+        return new Date(parsed._updatedAt).toLocaleString('zh-TW');
+      }
+    }
+    return null;
+  } catch (e) { return null; }
+}
+
+// ============================================================
+// EXPENSES (多筆) ARITHMETIC
+// ============================================================
+
+// 取得景點所有花費
+function getSpotExpenses(spotId) {
+  const sd = userData[spotId];
+  if (!sd) return [];
+  return sd.expenses || [];
+}
+
+// 新增一筆花費
+function addExpense(spotId, expense) {
+  if (!userData[spotId]) userData[spotId] = {};
+  if (!userData[spotId].expenses) userData[spotId].expenses = [];
+  userData[spotId].expenses.push({
+    id: Date.now() + Math.random(),
+    amount: parseFloat(expense.amount) || 0,
+    currency: expense.currency || 'JPY',
+    category: expense.category || '',
+    payer: expense.payer || '',
+    note: expense.note || ''
+  });
+  saveUserData(userData);
+  updateAllProgress();
+  if (typeof updatePayerSummary === 'function') updatePayerSummary();
+  if (typeof updateSheetsStats === 'function') updateSheetsStats();
+}
+
+// 刪除一筆花費
+function removeExpense(spotId, expenseId) {
+  if (!userData[spotId]?.expenses) return;
+  userData[spotId].expenses = userData[spotId].expenses.filter(e => e.id !== expenseId);
+  saveUserData(userData);
+  updateAllProgress();
+  if (typeof updatePayerSummary === 'function') updatePayerSummary();
+  if (typeof updateSheetsStats === 'function') updateSheetsStats();
+}
+
+// 計算景點總花費（換算為 JPY）
+function getSpotTotalJPY(spotId) {
+  const expenses = getSpotExpenses(spotId);
+  return expenses.reduce((sum, exp) => {
+    if (exp.currency === 'JPY') return sum + (parseFloat(exp.amount) || 0);
+    const twd = convertToTWD(exp.amount, exp.currency);
+    const jpyEquiv = twd / (exchangeRates.JPY || 0.21);
+    return sum + jpyEquiv;
+  }, 0);
+}
+
+// 計算景點總花費（換算為 TWD）
+function getSpotTotalTWD(spotId) {
+  const expenses = getSpotExpenses(spotId);
+  return expenses.reduce((sum, exp) => sum + convertToTWD(exp.amount, exp.currency), 0);
+}
+
+// ============================================================
+// PAYER SUMMARY (NEW v6)
+// ============================================================
+function getPayerSummary() {
+  const summary = { dad: 0, wife: 0, mom: 0, shared: 0, unassigned: 0 };
+  Object.keys(userData).forEach(spotId => {
+    const expenses = userData[spotId]?.expenses || [];
+    expenses.forEach(exp => {
+      const twd = convertToTWD(exp.amount, exp.currency);
+      if (exp.payer && summary[exp.payer] !== undefined) {
+        summary[exp.payer] += twd;
+      } else {
+        summary.unassigned += twd;
+      }
+    });
+  });
+  return summary;
+}
+
+function updatePayerSummary() {
+  const summary = getPayerSummary();
+  const cells = document.querySelectorAll('.hero-payer-cell-amount');
+  if (cells.length >= 4) {
+    cells[0].textContent = 'NT$ ' + Math.round(summary.dad).toLocaleString();
+    cells[1].textContent = 'NT$ ' + Math.round(summary.wife).toLocaleString();
+    cells[2].textContent = 'NT$ ' + Math.round(summary.mom).toLocaleString();
+    cells[3].textContent = 'NT$ ' + Math.round(summary.shared).toLocaleString();
+  }
+}
+
+
+function getSpotData(spotId) {
+  if (!userData[spotId]) userData[spotId] = {};
+  return userData[spotId];
+}
+
+function setSpotData(spotId, key, value) {
+  if (!userData[spotId]) userData[spotId] = {};
+  userData[spotId][key] = value;
+  saveUserData(userData);
+  updateAllProgress();
+  if (typeof updateSheetsStats === 'function') updateSheetsStats();
+}
+
+function resetAllData() {
+  if (confirm('確定要重置所有資料嗎？\n（包含進度、筆記、評分、實際花費、行李清單）')) {
+    userData = {};
+    packingData = {};
+    localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(PACKING_STORAGE_KEY);
+    location.reload();
+  }
+}
+
+// ============================================================
+// COUNTDOWN (NEW - 批次 2)
+// ============================================================
+const TRIP_START = new Date('2026-05-16T12:45:00+08:00');
+const TRIP_END = new Date('2026-05-24T11:35:00+08:00');
+
+function updateCountdown() {
+  const now = new Date();
+  const el = document.getElementById('countdownValue');
+  const labelEl = document.querySelector('.hero-countdown-label');
+  const iconEl = document.querySelector('.hero-countdown-icon');
+
+  if (now < TRIP_START) {
+    const diff = TRIP_START - now;
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    if (labelEl) labelEl.textContent = t('countdown.before');
+    if (iconEl) iconEl.textContent = '⏳';
+    el.innerHTML = `<strong>${days}</strong> 天 <strong>${hours}</strong> 小時 <strong>${mins}</strong> 分`;
+  } else if (now < TRIP_END) {
+    const elapsed = now - TRIP_START;
+    const dayN = Math.floor(elapsed / (1000 * 60 * 60 * 24)) + 1;
+    const remaining = TRIP_END - now;
+    const remDays = Math.floor(remaining / (1000 * 60 * 60 * 24));
+    const remHours = Math.floor((remaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    if (labelEl) labelEl.textContent = t('countdown.during', { n: dayN });
+    if (iconEl) iconEl.textContent = '🌸';
+    el.innerHTML = `還剩 <strong>${remDays}</strong> 天 <strong>${remHours}</strong> 小時`;
+  } else {
+    if (labelEl) labelEl.textContent = t('countdown.after');
+    if (iconEl) iconEl.textContent = '🏠';
+    el.innerHTML = '共 9 天美好回憶';
+  }
+}
+
+// ============================================================
+// PROGRESS & BUDGET CALCULATIONS
+// ============================================================
+function getDayCompletionStats(day) {
+  const dayData = DAYS_DATA.find(d => d.day === day);
+  if (!dayData) return { total: 0, completed: 0 };
+  const spots = dayData.timeline.filter(t => t.spotId);
+  const completed = spots.filter(t => userData[t.spotId]?.completed).length;
+  return { total: spots.length, completed };
+}
+
+function getDayBudgetStats(day) {
+  const dayData = DAYS_DATA.find(d => d.day === day);
+  if (!dayData) return { estimate: 0, actual: 0 };
+  const spots = dayData.timeline.filter(t => t.spotId);
+  const actual = spots.reduce((sum, t) => sum + getSpotTotalJPY(t.spotId), 0);
+  return { estimate: dayData.estBudget, actual: Math.round(actual) };
+}
+
+function getTotalStats() {
+  let totalSpots = 0, totalCompleted = 0, totalEstimate = 0, totalActual = 0;
+  DAYS_DATA.forEach(d => {
+    const completion = getDayCompletionStats(d.day);
+    const budget = getDayBudgetStats(d.day);
+    totalSpots += completion.total;
+    totalCompleted += completion.completed;
+    totalEstimate += budget.estimate;
+    totalActual += budget.actual;
+  });
+  return { totalSpots, totalCompleted, totalEstimate, totalActual };
+}
+
+function formatCurrency(n) { return '¥' + n.toLocaleString(); }
+
+function getBudgetStatus(actual, estimate) {
+  if (estimate === 0) return { class: 'success', text: '—' };
+  const ratio = actual / estimate;
+  if (ratio === 0) return { class: '', text: t('budget.notRecorded') };
+  if (ratio < 0.8) return { class: 'success', text: t('budget.inBudget') };
+  if (ratio < 1) return { class: 'success', text: t('budget.nearBudget') };
+  if (ratio < 1.1) return { class: 'warning', text: t('budget.warning') };
+  return { class: 'danger', text: t('budget.over') };
+}
+
+// ============================================================
+// OUTFIT SUGGESTION (NEW - 批次 2)
+// ============================================================
+function getOutfitSuggestion(weather) {
+  const tags = [];
+  const tMax = weather.tempMax;
+  const tMin = weather.tempMin;
+  const rain = weather.rainProb;
+  const wind = weather.windMax;
+  const uv = weather.uv;
+
+  // 溫度建議
+  if (tMax >= 25) tags.push({ icon: '👕', text: '短袖 T 恤' });
+  else if (tMax >= 20) tags.push({ icon: '👕', text: '長/短袖均可' });
+  else if (tMax >= 15) tags.push({ icon: '🧥', text: '薄長袖' });
+  else tags.push({ icon: '🧥', text: '保暖外套' });
+
+  if (tMin < 15) tags.push({ icon: '🧣', text: '加件外套' });
+  if (tMax - tMin > 10) tags.push({ icon: '🌡', text: '溫差大、洋蔥式' });
+
+  // 降雨建議
+  if (rain >= 60) tags.push({ icon: '☂', text: '雨具必備' });
+  else if (rain >= 30) tags.push({ icon: '☔', text: '備折傘' });
+
+  // UV 建議
+  if (uv >= 7) tags.push({ icon: '🧴', text: '強力防曬' });
+  else if (uv >= 5) tags.push({ icon: '🧴', text: '防曬乳' });
+
+  // 風速建議
+  if (wind >= 30) tags.push({ icon: '💨', text: '防風外套' });
+
+  return tags;
+}
+
+// ============================================================
+// RENDERING - OVERVIEW
+// ============================================================
+function renderOverview() {
+  const grid = document.getElementById('overviewGrid');
+  const titles = currentLang === 'ja' ? {
+    1: '到着 ✈', 2: '下町巡り 🏮', 3: '龍宮城 ♨',
+    4: '東京 3 つの顔 🏘', 5: '芝桜祭 🌸', 6: '河口湖 ⛰',
+    7: '新倉山+花園神社 🏯', 8: '佐原+成田 🏯', 9: '帰国 ✈'
+  } : currentLang === 'en' ? {
+    1: 'Arrival ✈', 2: 'Old Town 🏮', 3: 'Ryugujo Spa ♨',
+    4: 'Tokyo Trinity 🏘', 5: 'Shibazakura 🌸', 6: 'Lake Kawaguchi ⛰',
+    7: 'Arakurayama+Hanazono 🏯', 8: 'Sawara+Narita 🏯', 9: 'Return ✈'
+  } : {
+    1: '抵達日 ✈', 2: '東京下町日 🏮', 3: '龍宮城 ♨',
+    4: '東京三面相日 🏘', 5: '富士芝櫻祭 🌸', 6: '河口湖深度 ⛰',
+    7: '新倉山+花園神社 🏯', 8: '佐原+成田 🏯', 9: '回程日 ✈'
+  };
+  const subs = {
+    1: '5/16 SAT · 日暮里下町序曲', 2: '5/17 SUN · 三社祭+晴空塔',
+    3: '5/18 MON · 溫泉樂園過夜', 4: '5/19 TUE · 1914→1945→2023',
+    5: '5/20 WED · 河口湖觀光船', 6: '5/21 THU · 大石公園+音樂盒',
+    7: '5/22 FRI · 12年一遇本祭年', 8: '5/23 SAT · 江戶水鄉+古剎',
+    9: '5/24 SUN · 08:55 起飛'
+  };
+
+  grid.innerHTML = DAYS_DATA.map(d => {
+    const stats = getDayCompletionStats(d.day);
+    const progressPct = stats.total > 0 ? (stats.completed / stats.total * 100) : 0;
+    return `
+      <div class="overview-card" data-day="${d.day}">
+        <div class="overview-day-num">${d.day}</div>
+        <div class="overview-content">
+          <h3>${titles[d.day]}</h3>
+          <p>${subs[d.day]}</p>
+          ${stats.total > 0 ? `
+            <div class="overview-day-progress">
+              <div class="overview-day-progress-bar"><div class="overview-day-progress-fill" style="width: ${progressPct}%"></div></div>
+              <div class="overview-day-progress-text">${stats.completed}/${stats.total}</div>
+            </div>
+          ` : ''}
+        </div>
+        <div class="overview-weather" data-weather-day="${d.day}"><span style="font-size:14px;color:#bbb">…</span></div>
+        <div class="overview-arrow">›</div>
+      </div>
+    `;
+  }).join('');
+
+  document.querySelectorAll('.overview-card').forEach(card => {
+    card.addEventListener('click', () => showDay(card.dataset.day));
+  });
+}
+
+// ============================================================
+// RENDERING - DAY SECTION
+// ============================================================
+function renderDaySection(d) {
+  const stats = getDayCompletionStats(d.day);
+  const budget = getDayBudgetStats(d.day);
+  const budgetStatus = getBudgetStatus(budget.actual, budget.estimate);
+  const budgetPct = budget.estimate > 0 ? Math.min((budget.actual / budget.estimate * 100), 100) : 0;
+  const budgetFillClass = budgetPct < 80 ? 'success' : budgetPct < 100 ? 'success' : budgetPct < 110 ? 'warning' : 'danger';
+
+  // Get spots with coords for route map
+  const routeSpots = d.timeline.filter(t => t.spotId && SPOTS[t.spotId]?.coords).map(t => ({
+    id: t.spotId,
+    time: t.time,
+    title: t.overrideTitle || SPOTS[t.spotId].title,
+    coords: SPOTS[t.spotId].coords,
+    completed: !!userData[t.spotId]?.completed
+  }));
+
+  let timelineHTML = '';
+  d.timeline.forEach(item => {
+    if (item.groupTitle) {
+      timelineHTML += `<div class="timeline-group"><div class="timeline-group-title">${item.groupTitle}</div></div>`;
+      return;
+    }
+    const highlight = item.highlight ? ' highlight-row' : '';
+    if (item.clickable === false) {
+      timelineHTML += `
+        <div class="timeline-item${highlight} non-clickable">
+          <div class="time-col">${item.time}${item.sub ? `<span class="time-col-sub">${item.sub}</span>` : ''}</div>
+          <div class="event-col">
+            <div class="event-text-block">
+              <div class="event-title">${item.title}</div>
+              <div class="event-detail">${item.detail}</div>
+            </div>
+          </div>
+        </div>
+      `;
+      return;
+    }
+    if (item.spotId) {
+      const spot = SPOTS[item.spotId];
+      if (!spot) return;
+      const isCompleted = userData[item.spotId]?.completed;
+      const rating = userData[item.spotId]?.rating || 0;
+      const expenses = userData[item.spotId]?.expenses || [];
+      const totalJPY = getSpotTotalJPY(item.spotId);
+      const note = userData[item.spotId]?.note;
+      const title = item.overrideTitle || spot.title;
+      const detail = item.overrideDetail || spot.subtitle;
+      const cost = item.cost;
+      const thumbHTML = IMAGES[item.spotId]
+        ? `<div class="event-thumb" style="background-image: url('${IMAGES[item.spotId]}')"></div>`
+        : `<div class="event-thumb no-image">📍</div>`;
+
+      timelineHTML += `
+        <div class="timeline-item${highlight}">
+          <div class="time-col">${item.time}${item.sub ? `<span class="time-col-sub">${item.sub}</span>` : ''}</div>
+          <div class="event-col">
+            <div class="event-clickable ${isCompleted ? 'completed' : ''}" data-spot="${item.spotId}">
+              <div class="event-checkbox ${isCompleted ? 'checked' : ''}" data-checkbox="${item.spotId}"></div>
+              <div class="event-text-block">
+                <div class="event-title">${title}</div>
+                <div class="event-detail">${detail}</div>
+                <div class="event-meta">
+                  ${cost ? `<span class="cost">${cost}</span>` : ''}
+                  ${expenses.length > 0 ? `<span class="event-expense-summary">實 ¥${Math.round(totalJPY).toLocaleString()}<span class="event-expense-count"> (${expenses.length}筆)</span></span>` : ''}
+                  ${rating > 0 ? `<span class="event-rating-mini">${'★'.repeat(rating)}</span>` : ''}
+                  ${note ? '<span class="event-has-note">📝</span>' : ''}
+                </div>
+              </div>
+              ${thumbHTML}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+  });
+
+  return `
+    <section class="day-section" data-section="${d.day}">
+      <div class="weather-widget" data-weather-widget="${d.day}"><div class="weather-loading">LOADING WEATHER…</div></div>
+
+      ${routeSpots.length >= 2 ? `
+        <div class="route-map-wrap">
+          <div class="route-map-header">
+            <div class="route-map-title">${t('route.title')}</div>
+            <div class="route-map-count">${routeSpots.length} 個景點</div>
+          </div>
+          <div class="route-map-container" id="routeMap-${d.day}" data-route-day="${d.day}">
+            <div class="route-map-loading">LOADING MAP…</div>
+          </div>
+        </div>
+      ` : ''}
+
+      <div class="day-budget-bar">
+        <div class="day-budget-row">
+          <div class="day-budget-title">${t('budget.dayTitle')}</div>
+          <div class="day-budget-status ${budgetStatus.class}">${budgetStatus.text}</div>
+        </div>
+        <div class="day-budget-numbers">
+          <div>
+            <span class="day-budget-actual">${formatCurrency(budget.actual)}</span>
+            <span class="day-budget-divider"> / </span>
+            <span class="day-budget-estimate">${formatCurrency(budget.estimate)}</span>
+          </div>
+        </div>
+        <div class="day-budget-progress-bar">
+          <div class="day-budget-progress-fill ${budgetFillClass}" style="width: ${budgetPct}%"></div>
+        </div>
+      </div>
+
+      <div class="day-header">
+        <div class="day-num-large">${d.day}<sup>${d.date}</sup></div>
+        <div class="day-title">${d.title}</div>
+        <div class="day-meta">
+          <span class="meta-chip${d.intensity === '高' || d.intensity === '中高' ? ' accent' : ''}">強度 ${d.intensity}</span>
+          <span class="meta-chip">${d.luggage}</span>
+          ${stats.total > 0 ? `<span class="meta-chip">完成 ${stats.completed}/${stats.total}</span>` : ''}
+        </div>
+      </div>
+
+      <div class="timeline">${timelineHTML}</div>
+    </section>
+  `;
+}
+
+function renderAllDaySections() {
+  const container = document.getElementById('daySectionsContainer');
+  container.innerHTML = DAYS_DATA.map(d => renderDaySection(d)).join('');
+  bindAllEventListeners();
+}
+
+// ============================================================
+// LEAFLET MAPS (NEW - 批次 2)
+// ============================================================
+const dayMaps = {};
+
+function renderRouteMap(day) {
+  const container = document.getElementById(`routeMap-${day}`);
+  if (!container || dayMaps[day]) return;
+
+  if (typeof L === 'undefined') {
+    container.innerHTML = '<div class="route-map-loading">地圖載入中... 重新整理頁面</div>';
+    return;
+  }
+
+  const dayData = DAYS_DATA.find(d => d.day == day);
+  const routeSpots = dayData.timeline.filter(t => t.spotId && SPOTS[t.spotId]?.coords).map(t => ({
+    id: t.spotId,
+    time: t.time,
+    title: t.overrideTitle || SPOTS[t.spotId].title,
+    coords: SPOTS[t.spotId].coords,
+    completed: !!userData[t.spotId]?.completed
+  }));
+
+  if (routeSpots.length < 2) return;
+
+  // Clear loading
+  container.innerHTML = '';
+
+  // Calculate bounds
+  const lats = routeSpots.map(s => s.coords[0]);
+  const lngs = routeSpots.map(s => s.coords[1]);
+  const center = [
+    (Math.min(...lats) + Math.max(...lats)) / 2,
+    (Math.min(...lngs) + Math.max(...lngs)) / 2
+  ];
+
+  const map = L.map(container, {
+    center: center,
+    zoom: 12,
+    zoomControl: true,
+    scrollWheelZoom: false
+  });
+
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '© OpenStreetMap'
+  }).addTo(map);
+
+  // Add markers
+  routeSpots.forEach((spot, idx) => {
+    const isStart = idx === 0;
+    const isEnd = idx === routeSpots.length - 1;
+    const markerClass = spot.completed ? 'completed' : (isStart ? 'start' : isEnd ? 'end' : '');
+
+    const icon = L.divIcon({
+      className: '',
+      html: `<div class="custom-marker ${markerClass}">${idx + 1}</div>`,
+      iconSize: [28, 28],
+      iconAnchor: [14, 14]
+    });
+
+    const marker = L.marker(spot.coords, { icon }).addTo(map);
+    marker.bindPopup(`
+      <div class="map-popup-title">${spot.title}</div>
+      <div class="map-popup-time">${spot.time}</div>
+    `);
+
+    marker.on('click', () => {
+      // Open spot modal when marker clicked
+      setTimeout(() => openModal(spot.id), 100);
+    });
+  });
+
+  // Add route line
+  const latlngs = routeSpots.map(s => s.coords);
+  L.polyline(latlngs, {
+    color: '#c8553d',
+    weight: 3,
+    opacity: 0.7,
+    dashArray: '6, 8'
+  }).addTo(map);
+
+  // Fit bounds with padding
+  map.fitBounds(latlngs, { padding: [30, 30] });
+
+  dayMaps[day] = map;
+
+  // Force resize after a tick
+  setTimeout(() => map.invalidateSize(), 100);
+}
+
+// ============================================================
+// EVENT BINDINGS
+// ============================================================
+function bindAllEventListeners() {
+  document.querySelectorAll('[data-checkbox]').forEach(cb => {
+    cb.addEventListener('click', e => {
+      e.stopPropagation();
+      const spotId = cb.dataset.checkbox;
+      const current = userData[spotId]?.completed;
+      setSpotData(spotId, 'completed', !current);
+      // Reset day maps so they re-render with updated states
+      Object.keys(dayMaps).forEach(d => {
+        if (dayMaps[d]) { dayMaps[d].remove(); delete dayMaps[d]; }
+      });
+      renderAllDaySections();
+      const activeDay = document.querySelector('.day-section.active')?.dataset.section;
+      if (activeDay) showDay(activeDay);
+      if (window.cachedWeather) renderAllWeather(window.cachedWeather);
+    });
+  });
+
+  document.querySelectorAll('.event-clickable').forEach(el => {
+    el.addEventListener('click', e => {
+      if (e.target.closest('[data-checkbox]')) return;
+      const spotId = el.dataset.spot;
+      if (spotId && SPOTS[spotId]) openModal(spotId);
+    });
+  });
+}
+
+function updateAllProgress() {
+  const stats = getTotalStats();
+  document.getElementById('totalCompleted').textContent = stats.totalCompleted;
+  document.getElementById('totalSpots').textContent = stats.totalSpots;
+  const pct = stats.totalSpots > 0 ? (stats.totalCompleted / stats.totalSpots * 100) : 0;
+  document.getElementById('totalProgressFill').style.width = pct + '%';
+  document.getElementById('totalEstimate').textContent = formatCurrency(stats.totalEstimate);
+
+  const actualEl = document.getElementById('totalActual');
+  actualEl.textContent = formatCurrency(stats.totalActual);
+  actualEl.classList.remove('success', 'warning', 'danger');
+  if (stats.totalActual === 0) {}
+  else if (stats.totalActual < stats.totalEstimate * 0.8) actualEl.classList.add('success');
+  else if (stats.totalActual < stats.totalEstimate) actualEl.classList.add('success');
+  else if (stats.totalActual < stats.totalEstimate * 1.1) actualEl.classList.add('warning');
+  else actualEl.classList.add('danger');
+
+  document.querySelectorAll('.day-tab[data-day]').forEach(tab => {
+    const day = parseInt(tab.dataset.day);
+    if (isNaN(day)) return;
+    const dStats = getDayCompletionStats(day);
+    let existing = tab.querySelector('.day-tab-progress');
+    if (existing) existing.remove();
+    if (dStats.total > 0 && dStats.completed > 0) {
+      const dot = document.createElement('div');
+      dot.className = 'day-tab-progress';
+      if (dStats.completed === dStats.total) dot.classList.add('complete');
+      else dot.classList.add('partial');
+      tab.appendChild(dot);
+    }
+  });
+}
+
+// ============================================================
+// EMERGENCY RENDERING (NEW - 批次 3)
+// ============================================================
+function renderEmergency() {
+  const container = document.getElementById('emergencyContent');
+  container.innerHTML = EMERGENCY_DATA.map(cat => `
+    <div class="emergency-card">
+      <div class="emergency-card-header">
+        <div class="emergency-card-title">
+          <span class="emergency-card-icon">${cat.icon}</span>
+          ${cat.title}
+        </div>
+      </div>
+      <div class="emergency-list">
+        ${cat.items.map(item => `
+          <div class="emergency-item">
+            <div class="emergency-item-content">
+              <div class="emergency-item-name">${item.name}</div>
+              <div class="emergency-item-detail">${item.detail}</div>
+            </div>
+            ${item.tel ? `<a href="tel:${item.tel.replace(/\s/g, '')}" class="emergency-call-btn">📞 撥打</a>` : ''}
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+// ============================================================
+// PACKING RENDERING (NEW - 批次 3)
+// ============================================================
+function renderPacking() {
+  const container = document.getElementById('packingContent');
+  container.innerHTML = PACKING_DATA.map((cat, ci) => {
+    const checkedCount = cat.items.filter((_, ii) => packingData[`${ci}-${ii}`]).length;
+    return `
+      <div class="packing-category">
+        <div class="packing-category-title">
+          <span style="font-size:18px">${cat.icon}</span>
+          ${cat.category}
+          <span class="packing-category-count">${checkedCount}/${cat.items.length}</span>
+        </div>
+        ${cat.items.map((item, ii) => {
+          const key = `${ci}-${ii}`;
+          const isChecked = !!packingData[key];
+          return `
+            <div class="packing-item ${isChecked ? 'checked' : ''}" data-pack-key="${key}">
+              <div class="packing-checkbox"></div>
+              <div>
+                <div class="packing-item-text">${item.name}</div>
+                ${item.note ? `<div class="packing-item-note">${item.note}</div>` : ''}
+              </div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    `;
+  }).join('');
+
+  // Bind clicks
+  document.querySelectorAll('[data-pack-key]').forEach(el => {
+    el.addEventListener('click', () => {
+      const key = el.dataset.packKey;
+      packingData[key] = !packingData[key];
+      savePackingData(packingData);
+      renderPacking();
+      updatePackingStats();
+    });
+  });
+
+  updatePackingStats();
+}
+
+function updatePackingStats() {
+  let total = 0, done = 0;
+  PACKING_DATA.forEach((cat, ci) => {
+    cat.items.forEach((_, ii) => {
+      total++;
+      if (packingData[`${ci}-${ii}`]) done++;
+    });
+  });
+  document.getElementById('packingTotal').textContent = total;
+  document.getElementById('packingDone').textContent = done;
+  const pct = total > 0 ? (done / total * 100) : 0;
+  document.getElementById('packingFill').style.width = pct + '%';
+}
+
+// ============================================================
+// MODAL
+// ============================================================
+const modalOverlay = document.getElementById('modalOverlay');
+const modalContent = document.getElementById('modalContent');
+
+function openModal(spotId) {
+  const spot = SPOTS[spotId];
+  if (!spot) return;
+  const sd = getSpotData(spotId);
+  const isCompleted = !!sd.completed;
+  const rating = sd.rating || 0;
+  const note = sd.note || '';
+
+  let html = '';
+
+  if (spot.image) {
+    html += `<div class="modal-hero-image" style="background-image: url('${spot.image}')"><div class="modal-hero-overlay"><div class="modal-tag">${spot.tag}</div><div class="modal-title">${spot.title}</div><div class="modal-subtitle">${spot.subtitle}</div></div></div>`;
+  } else {
+    html += `<div class="modal-hero-image"><div class="modal-hero-overlay"><div class="modal-tag">${spot.tag}</div><div class="modal-title">${spot.title}</div><div class="modal-subtitle">${spot.subtitle}</div></div></div>`;
+  }
+
+  if (spot.quick) {
+    html += `<div class="modal-quick">${spot.quick.map(q => `<div class="modal-quick-item"><div class="modal-quick-label">${q[0]}</div><div class="modal-quick-value">${q[1]}</div></div>`).join('')}</div>`;
+  }
+
+  html += `
+    <div class="modal-actions">
+      <div class="modal-action-row">
+        <button class="action-button ${isCompleted ? 'completed' : ''}" id="actionToggleComplete">
+          <div class="action-button-icon">${isCompleted ? '✓' : '☐'}</div>
+          <div class="action-button-label">${isCompleted ? t('modal.completed') : t('modal.markComplete')}</div>
+        </button>
+      </div>
+      <div class="modal-rating">
+        <div class="modal-rating-label">${t('modal.rating')}</div>
+        <div class="modal-rating-stars">
+          ${[1,2,3,4,5].map(n => `<span class="modal-rating-star ${rating >= n ? 'active' : ''}" data-star="${n}">★</span>`).join('')}
+        </div>
+      </div>
+      <div class="modal-cost">
+        <div class="modal-cost-label">實際花費紀錄</div>
+
+        <!-- 花費紀錄列表 -->
+        <div class="expense-list" id="expenseList"></div>
+
+        <!-- 新增表單 -->
+        <div class="expense-add-form">
+          <div class="expense-add-form-title">➕ 新增一筆花費</div>
+
+          <div class="expense-add-currency-amount">
+            <select class="modal-select" id="addCurrencySelect">
+              <option value="JPY">¥ 日圓</option>
+              <option value="TWD">NT$ 台幣</option>
+              <option value="USD">$ 美金</option>
+            </select>
+            <div class="expense-cost-input-wrapper">
+              <span class="expense-cost-currency-sym" id="addCurrencySymbol">¥</span>
+              <input type="number" class="expense-cost-input" id="addCostInput" placeholder="輸入金額" inputmode="decimal" step="any">
+            </div>
+          </div>
+
+          <div class="expense-add-twd-display empty" id="addTwdDisplay">輸入金額後自動換算台幣</div>
+
+          <div class="expense-add-row">
+            <select class="modal-select" id="addCategorySelect">
+              <option value="">— 分類 —</option>
+              <option value="transport">🚆 交通</option>
+              <option value="food">🍱 餐飲</option>
+              <option value="ticket">🎫 門票</option>
+              <option value="hotel">🏨 住宿</option>
+              <option value="shopping">🛍 購物</option>
+              <option value="cosmetics">💊 藥妝</option>
+              <option value="souvenir">🎁 伴手禮</option>
+              <option value="other">⚡ 雜支</option>
+            </select>
+            <select class="modal-select" id="addPayerSelect">
+              <option value="">— 付款人 —</option>
+              <option value="dad">👨 爸爸</option>
+              <option value="wife">👩 老婆</option>
+              <option value="mom">👵 媽媽</option>
+              <option value="shared">👥 共付</option>
+            </select>
+          </div>
+
+          <input type="text" class="expense-add-note-input" id="addNoteInput" placeholder="備註（如：4 人門票、午餐）">
+
+          <button class="expense-add-button" id="addExpenseBtn" disabled>✓ 加入這筆</button>
+        </div>
+
+        ${spot.quick && spot.quick.find(q => q[1].toString().includes('¥')) ? `<div class="modal-cost-estimate" style="margin-top:8px;">${t('modal.estimate')}: ${spot.quick.find(q => q[1].toString().includes('¥'))[1]}</div>` : ''}
+      </div>
+
+      <div class="modal-note">
+        <div class="modal-note-label">${t('modal.note')}（景點心得）</div>
+        <textarea class="modal-note-textarea" id="noteInput" placeholder="${t('modal.notePlaceholder')}">${note}</textarea>
+      </div>
+    </div>
+  `;
+
+  if (spot.intro) html += `<div class="modal-section"><div class="modal-section-title">${t('modal.intro')}</div><p>${spot.intro}</p></div>`;
+
+  if (spot.coords) {
+    const [lat, lng] = spot.coords;
+    const mapEmbed = `https://maps.google.com/maps?q=${lat},${lng}&hl=zh-TW&z=15&output=embed`;
+    const mapOpen = `https://www.google.com/maps/search/?api=1&query=${lat}%2C${lng}`;
+    html += `<div class="modal-section"><div class="modal-section-title">${t('modal.location')}</div><div class="modal-map-wrapper"><iframe class="modal-map" src="${mapEmbed}" loading="lazy"></iframe></div><a href="${mapOpen}" target="_blank" class="modal-link accent">${t('modal.openMaps')}</a></div>`;
+  }
+
+  // Sections (亮點/重點等)
+  if (spot.sections) {
+    spot.sections.forEach(section => {
+      html += `<div class="modal-section"><div class="modal-section-title">${section.title}</div><ul>${section.items.map(item => `<li>${item}</li>`).join('')}</ul></div>`;
+    });
+  }
+
+  // Warnings (注意事項)
+  if (spot.warnings && spot.warnings.length) {
+    html += `<div class="modal-section"><div class="modal-warning"><div class="modal-section-title">⚠ 注意事項</div><ul>${spot.warnings.map(w => `<li>${w}</li>`).join('')}</ul></div></div>`;
+  }
+
+  // Links (相關連結)
+  if (spot.links && spot.links.length) {
+    html += `<div class="modal-section"><div class="modal-section-title">相關連結</div>${spot.links.map(link => `<a href="${link.url}" target="_blank" class="modal-link">${link.label} →</a>`).join('')}</div>`;
+  }
+
+  modalContent.innerHTML = html;
+  modalOverlay.classList.add('active');
+  document.body.classList.add('modal-open');
+  document.querySelector('.modal').scrollTop = 0;
+
+  document.getElementById('actionToggleComplete').addEventListener('click', () => {
+    const newState = !userData[spotId]?.completed;
+    setSpotData(spotId, 'completed', newState);
+    const btn = document.getElementById('actionToggleComplete');
+    btn.classList.toggle('completed', newState);
+    btn.querySelector('.action-button-icon').textContent = newState ? '✓' : '☐';
+    btn.querySelector('.action-button-label').textContent = newState ? t('modal.completed') : t('modal.markComplete');
+    Object.keys(dayMaps).forEach(d => {
+      if (dayMaps[d]) { dayMaps[d].remove(); delete dayMaps[d]; }
+    });
+    renderAllDaySections();
+    if (window.cachedWeather) renderAllWeather(window.cachedWeather);
+  });
+
+  document.querySelectorAll('.modal-rating-star').forEach(star => {
+    star.addEventListener('click', () => {
+      const n = parseInt(star.dataset.star);
+      setSpotData(spotId, 'rating', n);
+      document.querySelectorAll('.modal-rating-star').forEach((s, idx) => {
+        s.classList.toggle('active', idx < n);
+      });
+      renderAllDaySections();
+      if (window.cachedWeather) renderAllWeather(window.cachedWeather);
+    });
+  });
+
+  // ===== 多筆記帳系統 =====
+
+  // 渲染花費列表
+  function renderExpenseList() {
+    const expenses = getSpotExpenses(spotId);
+    const listEl = document.getElementById('expenseList');
+    if (!listEl) return;
+
+    if (expenses.length === 0) {
+      listEl.innerHTML = '<div class="expense-list-empty">尚未記錄任何花費</div>';
+      return;
+    }
+
+    let html = '';
+    expenses.forEach(exp => {
+      const symbol = currencySymbols[exp.currency] || '¥';
+      const twd = convertToTWD(exp.amount, exp.currency);
+      const catIcon = categoryIcons[exp.category] || '';
+      const payerIcon = payerIcons[exp.payer] || '';
+      const noteText = exp.note ? `· ${exp.note}` : '';
+      html += `
+        <div class="expense-row">
+          <div class="expense-row-icons">${catIcon}${payerIcon}</div>
+          <div class="expense-row-content">
+            <div>
+              <span class="expense-row-amount">${symbol}${parseFloat(exp.amount).toLocaleString()}</span>
+              <span class="expense-row-twd">≈ NT$ ${Math.round(twd).toLocaleString()}</span>
+            </div>
+            ${exp.note ? `<div class="expense-row-note">${exp.note}</div>` : ''}
+          </div>
+          <button class="expense-row-delete" data-exp-id="${exp.id}" title="刪除">🗑</button>
+        </div>
+      `;
+    });
+
+    // 小計
+    const totalJPY = getSpotTotalJPY(spotId);
+    const totalTWD = getSpotTotalTWD(spotId);
+    html += `
+      <div class="expense-list-summary">
+        <div class="expense-list-summary-label">小計（${expenses.length} 筆）</div>
+        <div>
+          <span class="expense-list-summary-amount">¥${Math.round(totalJPY).toLocaleString()}</span>
+          <span class="expense-list-summary-twd">≈ NT$ ${Math.round(totalTWD).toLocaleString()}</span>
+        </div>
+      </div>
+    `;
+
+    listEl.innerHTML = html;
+
+    // 綁定刪除按鈕
+    listEl.querySelectorAll('.expense-row-delete').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const expId = parseFloat(btn.dataset.expId);
+        const exp = expenses.find(e => e.id === expId);
+        const symbol = currencySymbols[exp?.currency] || '¥';
+        const noteShow = exp?.note ? `（${exp.note}）` : '';
+        if (confirm(`確定刪除這筆 ${symbol}${parseFloat(exp.amount).toLocaleString()} ${noteShow} 嗎？`)) {
+          removeExpense(spotId, expId);
+          renderExpenseList();
+          renderAllDaySections();
+          if (window.cachedWeather) renderAllWeather(window.cachedWeather);
+        }
+      });
+    });
+  }
+
+  renderExpenseList();
+
+  // 新增表單元件
+  const addCurrencySelect = document.getElementById('addCurrencySelect');
+  const addCostInput = document.getElementById('addCostInput');
+  const addCategorySelect = document.getElementById('addCategorySelect');
+  const addPayerSelect = document.getElementById('addPayerSelect');
+  const addNoteInput = document.getElementById('addNoteInput');
+  const addExpenseBtn = document.getElementById('addExpenseBtn');
+  const addCurrencySymbol = document.getElementById('addCurrencySymbol');
+  const addTwdDisplay = document.getElementById('addTwdDisplay');
+
+  function updateAddTwdDisplay() {
+    const val = addCostInput.value;
+    const cur = addCurrencySelect.value;
+    if (val && parseFloat(val) > 0) {
+      const twd = convertToTWD(val, cur);
+      addTwdDisplay.textContent = `≈ NT$ ${twd.toLocaleString(undefined, {maximumFractionDigits: 0})}`;
+      addTwdDisplay.classList.remove('empty');
+    } else {
+      addTwdDisplay.textContent = '輸入金額後自動換算台幣';
+      addTwdDisplay.classList.add('empty');
+    }
+  }
+
+  function updateAddBtnState() {
+    const hasAmount = addCostInput.value && parseFloat(addCostInput.value) > 0;
+    addExpenseBtn.disabled = !hasAmount;
+  }
+
+  addCurrencySelect.addEventListener('change', () => {
+    addCurrencySymbol.textContent = currencySymbols[addCurrencySelect.value] || '¥';
+    updateAddTwdDisplay();
+  });
+
+  addCostInput.addEventListener('input', () => {
+    updateAddTwdDisplay();
+    updateAddBtnState();
+  });
+
+  addExpenseBtn.addEventListener('click', () => {
+    if (!addCostInput.value || parseFloat(addCostInput.value) <= 0) {
+      alert('請輸入有效金額');
+      return;
+    }
+
+    addExpense(spotId, {
+      amount: addCostInput.value,
+      currency: addCurrencySelect.value,
+      category: addCategorySelect.value,
+      payer: addPayerSelect.value,
+      note: addNoteInput.value.trim()
+    });
+
+    // 清空表單
+    addCostInput.value = '';
+    addCategorySelect.value = '';
+    addPayerSelect.value = '';
+    addNoteInput.value = '';
+    updateAddTwdDisplay();
+    updateAddBtnState();
+
+    // 重新渲染
+    renderExpenseList();
+    renderAllDaySections();
+    if (window.cachedWeather) renderAllWeather(window.cachedWeather);
+
+    // Focus 回金額欄位、方便連續輸入
+    addCostInput.focus();
+  });
+
+  const noteInput = document.getElementById('noteInput');
+  let noteTimeout;
+  noteInput.addEventListener('input', () => {
+    clearTimeout(noteTimeout);
+    noteTimeout = setTimeout(() => {
+      setSpotData(spotId, 'note', noteInput.value);
+      renderAllDaySections();
+      if (window.cachedWeather) renderAllWeather(window.cachedWeather);
+    }, 500);
+  });
+}
+
+function closeModal() {
+  modalOverlay.classList.remove('active');
+  document.body.classList.remove('modal-open');
+}
+
+modalOverlay.addEventListener('click', e => { if (e.target === modalOverlay) closeModal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+// ============================================================
+// WEATHER (含穿搭建議)
+// ============================================================
+const TRIP_DAYS_WEATHER = [
+  { day: 1, date: '2026-05-16', city: '東京', lat: 35.7281, lon: 139.7707, fujiCheck: false },
+  { day: 2, date: '2026-05-17', city: '淺草', lat: 35.7148, lon: 139.7967, fujiCheck: false },
+  { day: 3, date: '2026-05-18', city: '木更津', lat: 35.4196, lon: 139.9071, fujiCheck: false },
+  { day: 4, date: '2026-05-19', city: '東京', lat: 35.6812, lon: 139.7671, fujiCheck: false },
+  { day: 5, date: '2026-05-20', city: '富士河口湖', lat: 35.4859, lon: 138.6238, fujiCheck: true },
+  { day: 6, date: '2026-05-21', city: '河口湖', lat: 35.5288, lon: 138.7460, fujiCheck: true },
+  { day: 7, date: '2026-05-22', city: '富士吉田', lat: 35.5005, lon: 138.8019, fujiCheck: true },
+  { day: 8, date: '2026-05-23', city: '成田', lat: 35.7860, lon: 140.3174, fujiCheck: false },
+  { day: 9, date: '2026-05-24', city: '成田', lat: 35.7860, lon: 140.3174, fujiCheck: false }
+];
+
+function decodeWeather(code) {
+  const m = {
+    0: ['☀','晴朗'], 1: ['🌤','大致晴'], 2: ['⛅','局部多雲'], 3: ['☁','多雲'],
+    45: ['🌫','霧'], 48: ['🌫','霧'],
+    51: ['🌦','毛毛雨'], 53: ['🌦','毛毛雨'], 55: ['🌧','毛毛雨'],
+    61: ['🌧','小雨'], 63: ['🌧','雨'], 65: ['⛈','大雨'],
+    71: ['🌨','小雪'], 73: ['❄','雪'], 75: ['❄','大雪'],
+    80: ['🌦','陣雨'], 81: ['🌧','陣雨'], 82: ['⛈','強陣雨'],
+    95: ['⛈','雷雨'], 96: ['⛈','雷雨冰雹'], 99: ['⛈','強雷雨']
+  };
+  return m[code] || ['🌤','—'];
+}
+
+function fujiVisibility(cloudCover, precipProbability) {
+  if (precipProbability > 60) return { status: 'poor', text: '☔ 不佳', detail: '降雨機率高' };
+  if (cloudCover > 80) return { status: 'poor', text: '☁ 不佳', detail: `雲量過多（${Math.round(cloudCover)}%）` };
+  if (cloudCover > 50) return { status: 'fair', text: '⛅ 普通', detail: `雲量 ${Math.round(cloudCover)}%` };
+  if (cloudCover > 25) return { status: 'good', text: '🌤 良好', detail: `雲量 ${Math.round(cloudCover)}%` };
+  return { status: 'excellent', text: '☀ 絕佳', detail: `雲量 ${Math.round(cloudCover)}%，富士山清晰可見` };
+}
+
+const WEATHER_CACHE_KEY = 'tokyo_trip_weather_cache_v1';
+const CACHE_TTL = 6 * 60 * 60 * 1000;
+
+function getCache() {
+  try {
+    const cached = sessionStorage.getItem(WEATHER_CACHE_KEY);
+    if (!cached) return null;
+    const data = JSON.parse(cached);
+    if (Date.now() - data.timestamp > CACHE_TTL) return null;
+    return data.weather;
+  } catch (e) { return null; }
+}
+
+function setCache(weather) {
+  try { sessionStorage.setItem(WEATHER_CACHE_KEY, JSON.stringify({ timestamp: Date.now(), weather })); } catch (e) {}
+}
+
+async function fetchWeather() {
+  const cached = getCache();
+  if (cached) {
+    window.cachedWeather = cached;
+    renderAllWeather(cached);
+    return;
+  }
+
+  const uniqueLocations = [];
+  const locMap = new Map();
+  TRIP_DAYS_WEATHER.forEach(d => {
+    const key = `${d.lat},${d.lon}`;
+    if (!locMap.has(key)) {
+      locMap.set(key, uniqueLocations.length);
+      uniqueLocations.push({ lat: d.lat, lon: d.lon });
+    }
+    d.locIdx = locMap.get(key);
+  });
+
+  try {
+    const promises = uniqueLocations.map(loc => {
+      const url = `https://api.open-meteo.com/v1/forecast?latitude=${loc.lat}&longitude=${loc.lon}&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_speed_10m_max,uv_index_max&hourly=temperature_2m,weather_code,precipitation_probability,cloud_cover&timezone=Asia%2FTokyo&forecast_days=16`;
+      return fetch(url).then(r => r.json());
+    });
+
+    const results = await Promise.all(promises);
+    const weatherByDay = {};
+
+    TRIP_DAYS_WEATHER.forEach(tripDay => {
+      const apiData = results[tripDay.locIdx];
+      const dailyIdx = apiData.daily.time.indexOf(tripDay.date);
+      if (dailyIdx === -1) {
+        weatherByDay[tripDay.day] = { error: 'beyond_range', date: tripDay.date };
+      } else {
+        const hourlyStart = apiData.hourly.time.findIndex(t => t.startsWith(tripDay.date));
+        const hourly = [];
+        if (hourlyStart >= 0) {
+          for (let i = 0; i < 24 && (hourlyStart + i) < apiData.hourly.time.length; i++) {
+            const idx = hourlyStart + i;
+            if (apiData.hourly.time[idx].startsWith(tripDay.date)) {
+              hourly.push({
+                hour: parseInt(apiData.hourly.time[idx].substr(11, 2)),
+                temp: apiData.hourly.temperature_2m[idx],
+                code: apiData.hourly.weather_code[idx],
+                rain: apiData.hourly.precipitation_probability[idx] || 0,
+                cloud: apiData.hourly.cloud_cover[idx] || 0
+              });
+            }
+          }
+        }
+        const dayTime = hourly.filter(h => h.hour >= 8 && h.hour <= 18);
+        const avgCloud = dayTime.length > 0 ? dayTime.reduce((s, h) => s + h.cloud, 0) / dayTime.length : 0;
+        weatherByDay[tripDay.day] = {
+          tempMax: apiData.daily.temperature_2m_max[dailyIdx],
+          tempMin: apiData.daily.temperature_2m_min[dailyIdx],
+          code: apiData.daily.weather_code[dailyIdx],
+          rainProb: apiData.daily.precipitation_probability_max[dailyIdx] || 0,
+          windMax: apiData.daily.wind_speed_10m_max[dailyIdx],
+          uv: apiData.daily.uv_index_max[dailyIdx],
+          avgCloud, hourly,
+          fujiCheck: tripDay.fujiCheck, city: tripDay.city
+        };
+      }
+    });
+
+    setCache(weatherByDay);
+    window.cachedWeather = weatherByDay;
+    renderAllWeather(weatherByDay);
+  } catch (e) {
+    console.error('Weather fetch failed:', e);
+    document.querySelectorAll('[data-weather-widget]').forEach(el => {
+      el.innerHTML = '<div class="weather-loading">無法載入天氣資料</div>';
+    });
+  }
+}
+
+function renderAllWeather(weatherByDay) {
+  document.querySelectorAll('[data-weather-widget]').forEach(widget => {
+    const day = parseInt(widget.dataset.weatherWidget);
+    const data = weatherByDay[day];
+    if (!data) { widget.innerHTML = '<div class="weather-loading">無資料</div>'; return; }
+    if (data.error === 'beyond_range') {
+      widget.innerHTML = `<div class="weather-future"><div class="weather-future-icon">📅</div><div class="weather-future-title">${t('weather.future.title', { date: data.date })}</div><div class="weather-future-detail">${t('weather.future.detail')}</div></div>`;
+      return;
+    }
+    const [icon, label] = decodeWeather(data.code);
+    let html = `
+      <div class="weather-content">
+        <div class="weather-header">
+          <div><div class="weather-location">${data.city}</div><div class="weather-summary">${label}</div></div>
+          <div class="weather-icon-large">${icon}</div>
+        </div>
+        <div class="weather-temps">
+          <div class="weather-temp-max">${Math.round(data.tempMax)}<span class="weather-temp-unit">°</span></div>
+          <div class="weather-temp-min">/ ${Math.round(data.tempMin)}°</div>
+        </div>
+        <div class="weather-stats-row">
+          <div class="weather-stat"><div class="weather-stat-icon">💧</div><div class="weather-stat-value">${Math.round(data.rainProb)}%</div><div class="weather-stat-label">RAIN</div></div>
+          <div class="weather-stat"><div class="weather-stat-icon">💨</div><div class="weather-stat-value">${Math.round(data.windMax)}</div><div class="weather-stat-label">KM/H</div></div>
+          <div class="weather-stat"><div class="weather-stat-icon">☀</div><div class="weather-stat-value">${data.uv ? Math.round(data.uv) : '—'}</div><div class="weather-stat-label">UV</div></div>
+        </div>
+    `;
+
+    // OUTFIT SUGGESTION (NEW)
+    const outfit = getOutfitSuggestion(data);
+    if (outfit.length > 0) {
+      html += `<div class="weather-outfit">
+        <div class="weather-outfit-title">${t('weather.outfit')}</div>
+        <div class="weather-outfit-content">
+          ${outfit.map(o => `<span class="outfit-tag"><span class="outfit-tag-icon">${o.icon}</span>${o.text}</span>`).join('')}
+        </div>
+      </div>`;
+    }
+
+    if (data.fujiCheck) {
+      const fuji = fujiVisibility(data.avgCloud, data.rainProb);
+      html += `<div class="weather-fuji"><div class="weather-fuji-title">🗻 富士山可見度</div><div class="weather-fuji-status ${fuji.status}">${fuji.text}</div><div class="weather-fuji-detail">${fuji.detail}</div></div>`;
+    }
+    html += '</div>';
+    widget.innerHTML = html;
+  });
+
+  document.querySelectorAll('[data-weather-day]').forEach(el => {
+    const day = parseInt(el.dataset.weatherDay);
+    const data = weatherByDay[day];
+    if (!data || data.error) { el.innerHTML = '<span style="font-size:14px;color:#bbb">—</span>'; return; }
+    const [icon] = decodeWeather(data.code);
+    el.innerHTML = `${icon}<div class="overview-weather-temp">${Math.round(data.tempMax)}°</div>`;
+  });
+
+  document.querySelectorAll('.day-tab[data-day]').forEach(tab => {
+    const day = parseInt(tab.dataset.day);
+    if (isNaN(day)) return;
+    const data = weatherByDay[day];
+    if (!data || data.error) return;
+    const [icon] = decodeWeather(data.code);
+    let existing = tab.querySelector('.day-tab-weather');
+    if (existing) existing.remove();
+    const ind = document.createElement('div');
+    ind.className = 'day-tab-weather';
+    ind.textContent = icon;
+    tab.appendChild(ind);
+  });
+}
+
+// ============================================================
+// APP NAVIGATION
+// ============================================================
+function showDay(day) {
+  document.querySelectorAll('.day-tab').forEach(t => t.classList.toggle('active', t.dataset.day === day));
+  document.querySelectorAll('.day-section').forEach(s => s.classList.toggle('active', s.dataset.section === day));
+  const activeTab = document.querySelector('.day-tab.active');
+  if (activeTab) activeTab.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+  setTimeout(() => {
+    const heroHeight = document.querySelector('.hero').offsetHeight;
+    window.scrollTo({ top: heroHeight, behavior: 'smooth' });
+
+    // Render route map for this day if applicable
+    const dayNum = parseInt(day);
+    if (!isNaN(dayNum)) renderRouteMap(dayNum);
+  }, 50);
+}
+
+document.querySelectorAll('.day-tab').forEach(tab => {
+  tab.addEventListener('click', () => showDay(tab.dataset.day));
+});
+
+document.querySelectorAll('.lang-btn').forEach(btn => {
+  btn.addEventListener('click', () => setLang(btn.dataset.lang));
+});
+
+const fab = document.getElementById('backToTop');
+window.addEventListener('scroll', () => fab.classList.toggle('visible', window.scrollY > 400));
+
+// ============================================================
+// PWA INSTALL (NEW - 批次 4)
+// ============================================================
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  const btn = document.getElementById('pwaButton');
+  if (btn) btn.style.display = 'inline-flex';
+});
+
+function installPWA() {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(() => {
+      deferredPrompt = null;
+      const btn = document.getElementById('pwaButton');
+      if (btn) btn.style.display = 'none';
+    });
+  } else {
+    alert('iOS 用戶請點擊瀏覽器分享按鈕 → 加入主畫面\nAndroid 用戶請點擊瀏覽器選單 → 安裝 App');
+  }
+}
+
+// ============================================================
+// CSV EXPORT (NEW v7)
+// ============================================================
+
+// 將資料轉成 CSV 字串
+function toCSV(rows) {
+  return rows.map(row =>
+    row.map(cell => {
+      if (cell == null) return '';
+      const s = String(cell);
+      // 含逗號、引號、換行需用引號包起來
+      if (s.includes(',') || s.includes('"') || s.includes('\n')) {
+        return '"' + s.replace(/"/g, '""') + '"';
+      }
+      return s;
+    }).join(',')
+  ).join('\n');
+}
+
+// 取得景點所屬日期
+function getSpotDay(spotId) {
+  for (const d of DAYS_DATA) {
+    if (d.timeline.find(t => t.spotId === spotId)) return d;
+  }
+  return null;
+}
+
+// 取得景點時間
+function getSpotTime(spotId) {
+  for (const d of DAYS_DATA) {
+    const t = d.timeline.find(t => t.spotId === spotId);
+    if (t) return t.time;
+  }
+  return '';
+}
+
+// 取得景點顯示名稱
+function getSpotDisplayName(spotId) {
+  for (const d of DAYS_DATA) {
+    const t = d.timeline.find(t => t.spotId === spotId);
+    if (t) return t.overrideTitle || SPOTS[spotId]?.title || spotId;
+  }
+  return SPOTS[spotId]?.title || spotId;
+}
+
+// 產生「花費明細」CSV（對應 Google Sheets 範本）
+function generateExpensesCSV() {
+  const rows = [
+    ['日期', '景點', '備註', '幣別', '原始金額', '費用分類', '付款人', '換算 (NT$)']
+  ];
+
+  Object.keys(userData).forEach(spotId => {
+    const expenses = userData[spotId]?.expenses || [];
+    if (expenses.length === 0) return;
+
+    const day = getSpotDay(spotId);
+    const date = day ? day.dateISO : '';
+    const spotName = getSpotDisplayName(spotId);
+
+    expenses.forEach(exp => {
+      const twd = convertToTWD(exp.amount, exp.currency);
+      rows.push([
+        date,
+        spotName,
+        exp.note || '',
+        exp.currency || 'JPY',
+        exp.amount || 0,
+        exp.category || '',
+        exp.payer || '',
+        Math.round(twd)
+      ]);
+    });
+  });
+
+  return toCSV(rows);
+}
+
+// 產生「景點進度」CSV
+function generateProgressCSV() {
+  const rows = [
+    ['日', '時間', '景點名稱', '預估 (NT$)', '完成', '評分', '備註']
+  ];
+
+  DAYS_DATA.forEach(d => {
+    d.timeline.forEach(item => {
+      if (!item.spotId) return;
+      const sd = userData[item.spotId] || {};
+      const completed = sd.completed ? '☑' : '';
+      const rating = sd.rating || '';
+      const note = sd.note || '';
+      const spotName = item.overrideTitle || SPOTS[item.spotId]?.title || item.spotId;
+
+      // 估算當筆台幣（從 cost 提取數字 * 0.21）
+      let estTwd = 0;
+      if (item.cost) {
+        const match = item.cost.match(/[\d,]+/);
+        if (match) {
+          const num = parseInt(match[0].replace(/,/g, ''));
+          if (!isNaN(num)) estTwd = Math.round(num * (exchangeRates.JPY || 0.21));
+        }
+      }
+
+      rows.push([
+        d.day,
+        item.time || '',
+        spotName,
+        estTwd,
+        completed,
+        rating,
+        note
+      ]);
+    });
+  });
+
+  return toCSV(rows);
+}
+
+// 複製到剪貼簿
+async function copyToClipboard(text) {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch (err) {
+    // Fallback: 用 textarea
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    try {
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      return true;
+    } catch (e) {
+      document.body.removeChild(ta);
+      return false;
+    }
+  }
+}
+
+// 下載檔案
+function downloadFile(filename, content, mime = 'text/csv;charset=utf-8') {
+  // 加 UTF-8 BOM 以便 Excel 正確識別中文
+  const blob = new Blob(['\ufeff' + content], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+// === 操作函式（按鈕） ===
+
+async function exportExpensesCSV() {
+  const csv = generateExpensesCSV();
+  const ok = await copyToClipboard(csv);
+  if (ok) {
+    alert('✅ 花費明細已複製到剪貼簿！\n\n請到 Google Sheets「花費明細」分頁，貼到下一個空白列即可。\n\n（不要貼到第 1、2 行的標題）');
+  } else {
+    alert('❌ 複製失敗，請改用「下載 CSV」功能');
+  }
+}
+
+async function exportProgressCSV() {
+  const csv = generateProgressCSV();
+  const ok = await copyToClipboard(csv);
+  if (ok) {
+    alert('✅ 景點進度已複製到剪貼簿！\n\n請到 Google Sheets「景點完成進度」分頁，貼到第 3 行（覆蓋現有資料）即可。');
+  } else {
+    alert('❌ 複製失敗，請改用「下載 CSV」功能');
+  }
+}
+
+function downloadAllCSV() {
+  const today = new Date().toISOString().split('T')[0];
+  const expensesCSV = generateExpensesCSV();
+  const progressCSV = generateProgressCSV();
+  downloadFile(`東京旅行_花費明細_${today}.csv`, expensesCSV);
+  setTimeout(() => {
+    downloadFile(`東京旅行_景點進度_${today}.csv`, progressCSV);
+  }, 500);
+  alert('✅ 已下載 2 個 CSV 檔案到下載資料夾');
+}
+
+function showCSVPreview() {
+  const card = document.getElementById('csvPreviewCard');
+  const content = document.getElementById('csvPreviewContent');
+  const expCSV = generateExpensesCSV();
+  const progCSV = generateProgressCSV();
+  content.textContent = '=== 花費明細 ===\n' + (expCSV || '（無資料）') + '\n\n=== 景點進度 ===\n' + progCSV;
+  card.style.display = 'block';
+  card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// 統計 - 更新 Sheets 分頁的概覽
+function updateSheetsStats() {
+  let expenseCount = 0;
+  let totalTWD = 0;
+  Object.keys(userData).forEach(spotId => {
+    const expenses = userData[spotId]?.expenses || [];
+    expenseCount += expenses.length;
+    expenses.forEach(exp => {
+      totalTWD += convertToTWD(exp.amount, exp.currency);
+    });
+  });
+
+  const stats = getTotalStats();
+
+  const el1 = document.getElementById('statsExpenseCount');
+  const el2 = document.getElementById('statsTotalTWD');
+  const el3 = document.getElementById('statsCompleted');
+  const el4 = document.getElementById('statsLastUpdate');
+
+  if (el1) el1.textContent = expenseCount;
+  if (el2) el2.textContent = 'NT$ ' + Math.round(totalTWD).toLocaleString();
+  if (el3) el3.textContent = `${stats.totalCompleted} / ${stats.totalSpots}`;
+  if (el4) el4.textContent = new Date().toLocaleString('zh-TW', {
+    month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'
+  });
+}
+
+// ============================================================
+// RATE SETTINGS UI
+// ============================================================
+function toggleRateSettings() {
+  const panel = document.getElementById('rateSettingsPanel');
+  panel.classList.toggle('show');
+  if (panel.classList.contains('show')) {
+    document.getElementById('rateJPY').value = exchangeRates.JPY.toFixed(3);
+    document.getElementById('rateUSD').value = exchangeRates.USD.toFixed(2);
+    const updateTime = getRateUpdateTime();
+    document.getElementById('rateUpdateTime').textContent = updateTime ? `最後更新：${updateTime}` : '尚未設定，使用預設匯率';
+  }
+}
+
+// ============================================================
+// INIT
+// ============================================================
+setLang(currentLang);
+renderOverview();
+renderAllDaySections();
+renderEmergency();
+renderPacking();
+updateAllProgress();
+updateCountdown();
+updatePayerSummary();
+updateSheetsStats();
+fetchWeather();
+
+// 綁定匯率輸入
+setTimeout(() => {
+  const rateJPY = document.getElementById('rateJPY');
+  const rateUSD = document.getElementById('rateUSD');
+  if (rateJPY && !rateJPY._bound) {
+    rateJPY._bound = true;
+    rateJPY.addEventListener('input', () => {
+      if (rateJPY.value && parseFloat(rateJPY.value) > 0) {
+        setRate('JPY', rateJPY.value);
+        document.getElementById('rateUpdateTime').textContent = `最後更新：${new Date().toLocaleString('zh-TW')}`;
+      }
+    });
+  }
+  if (rateUSD && !rateUSD._bound) {
+    rateUSD._bound = true;
+    rateUSD.addEventListener('input', () => {
+      if (rateUSD.value && parseFloat(rateUSD.value) > 0) {
+        setRate('USD', rateUSD.value);
+        document.getElementById('rateUpdateTime').textContent = `最後更新：${new Date().toLocaleString('zh-TW')}`;
+      }
+    });
+  }
+}, 100);
+
+setInterval(updateCountdown, 60000);
+</script>
+
+</body>
+</html>
