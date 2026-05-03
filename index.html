@@ -2180,6 +2180,249 @@ body.modal-open { overflow: hidden; }
   color: var(--c-ink);
 }
 
+
+/* ========== BUDGET SETTINGS PANEL (v9) ========== */
+.budget-panel {
+  margin: 16px 16px 0;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%);
+  border-radius: var(--r-md);
+  border: 1px solid #a5d6a7;
+  display: none;
+}
+.budget-panel.show { display: block; }
+
+.budget-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.budget-panel-title {
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--c-success);
+}
+
+.budget-panel-input-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.budget-panel-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: white;
+  padding: 9px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--c-line);
+}
+
+.budget-panel-input-wrapper:focus-within {
+  border-color: var(--c-success);
+  box-shadow: 0 0 0 3px rgba(82, 183, 136, 0.15);
+}
+
+.budget-panel-input-wrapper input {
+  border: none;
+  outline: none;
+  flex: 1;
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--c-ink);
+  background: transparent;
+  width: 100%;
+}
+
+.budget-panel-input-wrapper span {
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 12px;
+  color: var(--c-ink-faint);
+  font-weight: 600;
+}
+
+.budget-panel-clear {
+  padding: 8px 14px;
+  background: transparent;
+  border: 1px solid var(--c-line);
+  border-radius: 8px;
+  color: var(--c-ink-faint);
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.budget-panel-clear:hover {
+  border-color: var(--c-danger);
+  color: var(--c-danger);
+}
+
+.budget-panel-tip {
+  font-size: 11px;
+  color: var(--c-ink-soft);
+  line-height: 1.5;
+}
+
+/* HERO BUDGET DISPLAY 升級 */
+.hero-budget-status-bar {
+  margin-top: 8px;
+  display: none;
+}
+
+.hero-budget-status-bar.show { display: block; }
+
+.hero-budget-status-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 6px;
+}
+
+.hero-budget-status-label {
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.6);
+}
+
+.hero-budget-status-numbers {
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 12px;
+  color: rgba(255,255,255,0.95);
+  font-weight: 600;
+}
+
+.hero-budget-status-numbers strong {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.hero-budget-status-bar-bg {
+  width: 100%;
+  height: 6px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+
+.hero-budget-status-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #95d5b2 0%, #52b788 100%);
+  border-radius: 999px;
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hero-budget-status-bar-fill.warning {
+  background: linear-gradient(90deg, #f4a261 0%, #f4a261 100%);
+}
+
+.hero-budget-status-bar-fill.danger {
+  background: linear-gradient(90deg, #e76f51 0%, #d62828 100%);
+}
+
+.hero-budget-status-msg {
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.hero-budget-status-msg.success { color: #95d5b2; }
+.hero-budget-status-msg.warning { color: #f4a261; }
+.hero-budget-status-msg.danger { color: #f7a6a6; }
+
+/* ========== PAYER SETTINGS PANEL (v9) ========== */
+.payer-settings-panel {
+  margin: 16px 16px 0;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, #f3e5f5 0%, #fce4ec 100%);
+  border-radius: var(--r-md);
+  border: 1px solid #ce93d8;
+  display: none;
+}
+.payer-settings-panel.show { display: block; }
+
+.payer-settings-title {
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #8e24aa;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.payer-row {
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  gap: 8px;
+  margin-bottom: 8px;
+  align-items: center;
+}
+
+.payer-emoji-input {
+  text-align: center;
+  font-size: 22px;
+  padding: 6px;
+  border: 1px solid var(--c-line);
+  border-radius: 8px;
+  background: white;
+  outline: none;
+  width: 100%;
+}
+
+.payer-emoji-input:focus {
+  border-color: #8e24aa;
+  box-shadow: 0 0 0 3px rgba(142, 36, 170, 0.15);
+}
+
+.payer-name-input {
+  padding: 8px 12px;
+  border: 1px solid var(--c-line);
+  border-radius: 8px;
+  background: white;
+  outline: none;
+  font-family: 'Noto Serif TC', serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--c-ink);
+  width: 100%;
+}
+
+.payer-name-input:focus {
+  border-color: #8e24aa;
+  box-shadow: 0 0 0 3px rgba(142, 36, 170, 0.15);
+}
+
+.payer-settings-tip {
+  font-size: 11px;
+  color: var(--c-ink-soft);
+  line-height: 1.5;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed rgba(142, 36, 170, 0.3);
+}
+
+/* HERO PAYER 改成 3 欄 */
+.hero-payer-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
 </style>
 </head>
 <body>
@@ -2223,41 +2466,77 @@ body.modal-open { overflow: hidden; }
     </div>
   </div>
 
-  <!-- 各人花費小卡 -->
+  <!-- 預算進度條 (v9.1: 簡化版) -->
+  <div class="hero-budget-status-bar" id="heroBudgetStatusBar">
+    <div class="hero-budget-status-bar-bg">
+      <div class="hero-budget-status-bar-fill" id="heroBudgetFill" style="width: 0%"></div>
+    </div>
+    <div class="hero-budget-status-msg success" id="heroBudgetMsg">✓ 預算內</div>
+  </div>
+
+  <!-- 各人花費小卡 (v9: 改為 3 欄) -->
   <div class="hero-payer-summary">
     <div class="hero-payer-summary-title">各人已支付（NT$）</div>
-    <div class="hero-payer-grid">
-      <div class="hero-payer-cell">
-        <div class="hero-payer-cell-name">👨 爸爸</div>
-        <div class="hero-payer-cell-amount">NT$ 0</div>
-      </div>
-      <div class="hero-payer-cell">
-        <div class="hero-payer-cell-name">👩 老婆</div>
-        <div class="hero-payer-cell-amount">NT$ 0</div>
-      </div>
-      <div class="hero-payer-cell">
-        <div class="hero-payer-cell-name">👵 媽媽</div>
-        <div class="hero-payer-cell-amount">NT$ 0</div>
-      </div>
-      <div class="hero-payer-cell">
-        <div class="hero-payer-cell-name">👥 共付</div>
-        <div class="hero-payer-cell-amount">NT$ 0</div>
-      </div>
+    <div class="hero-payer-grid-3" id="heroPayerGrid">
+      <!-- 由 JS 動態渲染 -->
     </div>
   </div>
 
-  <!-- 工具列：語言切換、匯率、重置 -->
+  <!-- 工具列 -->
   <div class="hero-tools">
     <div class="lang-switcher">
       <button class="lang-btn active" data-lang="zh">中</button>
       <button class="lang-btn" data-lang="ja">日</button>
       <button class="lang-btn" data-lang="en">EN</button>
     </div>
+    <button class="tool-button" onclick="toggleBudgetSettings()">💰 預算</button>
+    <button class="tool-button" onclick="togglePayerSettings()">👥 付款人</button>
     <button class="tool-button" onclick="toggleRateSettings()">💱 匯率</button>
     <button class="tool-button danger" onclick="resetAllData()" data-i18n="hero.reset">重置資料</button>
     <button class="tool-button" onclick="installPWA()" id="pwaButton" style="display:none;">📱 安裝 App</button>
   </div>
 </header>
+
+<!-- 預算設定面板 (v9 NEW) -->
+<div class="budget-panel" id="budgetSettingsPanel">
+  <div class="budget-panel-header">
+    <div class="budget-panel-title">💰 設定總預算上限</div>
+  </div>
+  <div class="budget-panel-input-row">
+    <div class="budget-panel-input-wrapper">
+      <span>NT$</span>
+      <input type="number" id="budgetTotalInput" placeholder="例：60,000" inputmode="numeric">
+    </div>
+    <button class="budget-panel-clear" onclick="clearBudgetSetting()">清除</button>
+  </div>
+  <div class="budget-panel-tip">
+    💡 設定後在頂部會看到進度條<br>
+    💡 80% 黃色提醒、100% 紅色警示<br>
+    💡 留空或清除可關閉預算追蹤
+  </div>
+</div>
+
+<!-- 付款人設定面板 (v9 NEW) -->
+<div class="payer-settings-panel" id="payerSettingsPanel">
+  <div class="payer-settings-title">👥 自訂付款人（Emoji + 名字）</div>
+  <div class="payer-row">
+    <input type="text" class="payer-emoji-input" id="payer1Emoji" maxlength="2" value="👨">
+    <input type="text" class="payer-name-input" id="payer1Name" placeholder="名字" value="Arby">
+  </div>
+  <div class="payer-row">
+    <input type="text" class="payer-emoji-input" id="payer2Emoji" maxlength="2" value="👩">
+    <input type="text" class="payer-name-input" id="payer2Name" placeholder="名字" value="Vicky">
+  </div>
+  <div class="payer-row">
+    <input type="text" class="payer-emoji-input" id="payer3Emoji" maxlength="2" value="👥">
+    <input type="text" class="payer-name-input" id="payer3Name" placeholder="名字" value="共付">
+  </div>
+  <div class="payer-settings-tip">
+    💡 修改後會即時更新所有記帳介面<br>
+    💡 Emoji 欄位可從手機鍵盤選 (😀 表情符號)<br>
+    💡 設定儲存於本機，不影響家人 Sheets
+  </div>
+</div>
 
 <!-- 匯率設定面板 -->
 <div class="rate-settings-panel" id="rateSettingsPanel">
@@ -3474,19 +3753,61 @@ const categoryNames = {
   other: '雜支'
 };
 
-const payerIcons = {
-  dad: '👨',
-  wife: '👩',
-  mom: '👵',
-  shared: '👥'
+// ============================================================
+// PAYERS (v9 - 自訂付款人系統)
+// ============================================================
+const PAYER_STORAGE_KEY = 'tokyo_trip_payers_v1';
+
+// 預設值（會被 localStorage 覆蓋）
+const DEFAULT_PAYERS = {
+  p1: { emoji: '👨', name: 'Arby' },
+  p2: { emoji: '👩', name: 'Vicky' },
+  p3: { emoji: '👥', name: '共付' }
 };
 
-const payerNames = {
-  dad: '爸爸',
-  wife: '老婆',
-  mom: '媽媽',
-  shared: '共付'
-};
+function loadPayers() {
+  try {
+    const data = localStorage.getItem(PAYER_STORAGE_KEY);
+    if (data) {
+      const parsed = JSON.parse(data);
+      return { ...DEFAULT_PAYERS, ...parsed };
+    }
+    return { ...DEFAULT_PAYERS };
+  } catch (e) {
+    return { ...DEFAULT_PAYERS };
+  }
+}
+
+function savePayers(payers) {
+  try {
+    localStorage.setItem(PAYER_STORAGE_KEY, JSON.stringify(payers));
+  } catch (e) {}
+}
+
+let customPayers = loadPayers();
+
+// 動態 getter（取代寫死的 payerIcons / payerNames）
+function getPayerIcon(payerKey) {
+  // 舊資料相容：dad/wife/mom/shared
+  const map = { dad: 'p1', wife: 'p2', mom: 'p3', shared: 'p3' };
+  const key = map[payerKey] || payerKey;
+  return customPayers[key]?.emoji || '?';
+}
+
+function getPayerName(payerKey) {
+  const map = { dad: 'p1', wife: 'p2', mom: 'p3', shared: 'p3' };
+  const key = map[payerKey] || payerKey;
+  return customPayers[key]?.name || '未設定';
+}
+
+// 兼容舊資料的 icons/names（給舊有引用使用）
+const payerIcons = new Proxy({}, {
+  get: (target, prop) => getPayerIcon(prop)
+});
+
+const payerNames = new Proxy({}, {
+  get: (target, prop) => getPayerName(prop)
+});
 
 function loadRates() {
   try {
@@ -3599,13 +3920,17 @@ function getSpotTotalTWD(spotId) {
 // PAYER SUMMARY (NEW v6)
 // ============================================================
 function getPayerSummary() {
-  const summary = { dad: 0, wife: 0, mom: 0, shared: 0, unassigned: 0 };
+  const summary = { p1: 0, p2: 0, p3: 0, unassigned: 0 };
+  // 兼容舊資料的 mapping
+  const oldMap = { dad: 'p1', wife: 'p2', mom: 'p3', shared: 'p3' };
   Object.keys(userData).forEach(spotId => {
     const expenses = userData[spotId]?.expenses || [];
     expenses.forEach(exp => {
       const twd = convertToTWD(exp.amount, exp.currency);
-      if (exp.payer && summary[exp.payer] !== undefined) {
-        summary[exp.payer] += twd;
+      // 新 key 直接用、舊 key 透過 mapping
+      const key = oldMap[exp.payer] || exp.payer;
+      if (key && summary[key] !== undefined) {
+        summary[key] += twd;
       } else {
         summary.unassigned += twd;
       }
@@ -3616,13 +3941,26 @@ function getPayerSummary() {
 
 function updatePayerSummary() {
   const summary = getPayerSummary();
-  const cells = document.querySelectorAll('.hero-payer-cell-amount');
-  if (cells.length >= 4) {
-    cells[0].textContent = 'NT$ ' + Math.round(summary.dad).toLocaleString();
-    cells[1].textContent = 'NT$ ' + Math.round(summary.wife).toLocaleString();
-    cells[2].textContent = 'NT$ ' + Math.round(summary.mom).toLocaleString();
-    cells[3].textContent = 'NT$ ' + Math.round(summary.shared).toLocaleString();
+  // 動態渲染 hero-payer-grid-3
+  const grid = document.getElementById('heroPayerGrid');
+  if (grid) {
+    grid.innerHTML = `
+      <div class="hero-payer-cell">
+        <div class="hero-payer-cell-name">${customPayers.p1.emoji} ${customPayers.p1.name}</div>
+        <div class="hero-payer-cell-amount">NT$ ${Math.round(summary.p1).toLocaleString()}</div>
+      </div>
+      <div class="hero-payer-cell">
+        <div class="hero-payer-cell-name">${customPayers.p2.emoji} ${customPayers.p2.name}</div>
+        <div class="hero-payer-cell-amount">NT$ ${Math.round(summary.p2).toLocaleString()}</div>
+      </div>
+      <div class="hero-payer-cell">
+        <div class="hero-payer-cell-name">${customPayers.p3.emoji} ${customPayers.p3.name}</div>
+        <div class="hero-payer-cell-amount">NT$ ${Math.round(summary.p3).toLocaleString()}</div>
+      </div>
+    `;
   }
+  // 同時更新預算追蹤
+  if (typeof updateBudgetStatus === 'function') updateBudgetStatus();
 }
 
 
@@ -4076,16 +4414,41 @@ function updateAllProgress() {
   document.getElementById('totalSpots').textContent = stats.totalSpots;
   const pct = stats.totalSpots > 0 ? (stats.totalCompleted / stats.totalSpots * 100) : 0;
   document.getElementById('totalProgressFill').style.width = pct + '%';
-  document.getElementById('totalEstimate').textContent = formatCurrency(stats.totalEstimate);
 
+  // v9.1 修正：總預算和已花費都用 NT$ 顯示，並依設定動態顯示
+  const totalEstEl = document.getElementById('totalEstimate');
   const actualEl = document.getElementById('totalActual');
-  actualEl.textContent = formatCurrency(stats.totalActual);
+
+  // 總預算：如果有設定 myBudgetTotal 就顯示它、否則顯示「請設定預算」
+  if (typeof myBudgetTotal !== 'undefined' && myBudgetTotal > 0) {
+    totalEstEl.textContent = 'NT$ ' + Math.round(myBudgetTotal).toLocaleString();
+    totalEstEl.style.opacity = '1';
+  } else {
+    totalEstEl.textContent = '— 請設定預算';
+    totalEstEl.style.opacity = '0.5';
+    totalEstEl.style.fontSize = '14px';
+  }
+
+  // 已花費：用 NT$ 顯示總和
+  let totalSpentTWD = 0;
+  Object.keys(userData).forEach(spotId => {
+    const expenses = userData[spotId]?.expenses || [];
+    expenses.forEach(exp => {
+      totalSpentTWD += convertToTWD(exp.amount, exp.currency);
+    });
+  });
+
+  actualEl.textContent = 'NT$ ' + Math.round(totalSpentTWD).toLocaleString();
   actualEl.classList.remove('success', 'warning', 'danger');
-  if (stats.totalActual === 0) {}
-  else if (stats.totalActual < stats.totalEstimate * 0.8) actualEl.classList.add('success');
-  else if (stats.totalActual < stats.totalEstimate) actualEl.classList.add('success');
-  else if (stats.totalActual < stats.totalEstimate * 1.1) actualEl.classList.add('warning');
-  else actualEl.classList.add('danger');
+
+  if (typeof myBudgetTotal !== 'undefined' && myBudgetTotal > 0) {
+    const ratio = totalSpentTWD / myBudgetTotal;
+    if (ratio < 0.8) actualEl.classList.add('success');
+    else if (ratio < 1) actualEl.classList.add('warning');
+    else actualEl.classList.add('danger');
+  } else if (totalSpentTWD > 0) {
+    actualEl.classList.add('success');
+  }
 
   document.querySelectorAll('.day-tab[data-day]').forEach(tab => {
     const day = parseInt(tab.dataset.day);
@@ -4268,10 +4631,9 @@ function openModal(spotId) {
             </select>
             <select class="modal-select" id="addPayerSelect">
               <option value="">— 付款人 —</option>
-              <option value="dad">👨 爸爸</option>
-              <option value="wife">👩 老婆</option>
-              <option value="mom">👵 媽媽</option>
-              <option value="shared">👥 共付</option>
+              <option value="p1">${customPayers.p1.emoji} ${customPayers.p1.name}</option>
+              <option value="p2">${customPayers.p2.emoji} ${customPayers.p2.name}</option>
+              <option value="p3">${customPayers.p3.emoji} ${customPayers.p3.name}</option>
             </select>
           </div>
 
@@ -4982,6 +5344,133 @@ function updateSheetsStats() {
 }
 
 // ============================================================
+// BUDGET TOTAL SETTINGS (v9 NEW)
+// ============================================================
+const BUDGET_STORAGE_KEY = 'tokyo_trip_budget_total_v1';
+
+function loadBudgetTotal() {
+  try {
+    const v = localStorage.getItem(BUDGET_STORAGE_KEY);
+    return v ? parseFloat(v) : 0;
+  } catch (e) { return 0; }
+}
+
+function saveBudgetTotal(amount) {
+  try {
+    if (amount && amount > 0) {
+      localStorage.setItem(BUDGET_STORAGE_KEY, String(amount));
+    } else {
+      localStorage.removeItem(BUDGET_STORAGE_KEY);
+    }
+  } catch (e) {}
+}
+
+let myBudgetTotal = loadBudgetTotal();
+
+function getTotalSpentTWD() {
+  let total = 0;
+  Object.keys(userData).forEach(spotId => {
+    const expenses = userData[spotId]?.expenses || [];
+    expenses.forEach(exp => {
+      total += convertToTWD(exp.amount, exp.currency);
+    });
+  });
+  return total;
+}
+
+function updateBudgetStatus() {
+  const bar = document.getElementById('heroBudgetStatusBar');
+  if (!bar) return;
+
+  if (!myBudgetTotal || myBudgetTotal <= 0) {
+    bar.classList.remove('show');
+    return;
+  }
+
+  bar.classList.add('show');
+
+  const spent = getTotalSpentTWD();
+  const pct = (spent / myBudgetTotal) * 100;
+  const pctClamped = Math.min(pct, 100);
+
+  const fill = document.getElementById('heroBudgetFill');
+  fill.style.width = pctClamped + '%';
+  fill.classList.remove('warning', 'danger');
+
+  const msg = document.getElementById('heroBudgetMsg');
+  msg.classList.remove('success', 'warning', 'danger');
+
+  if (pct >= 100) {
+    fill.classList.add('danger');
+    msg.classList.add('danger');
+    const over = spent - myBudgetTotal;
+    msg.textContent = `🚨 已超出預算 NT$ ${Math.round(over).toLocaleString()}`;
+  } else if (pct >= 80) {
+    fill.classList.add('warning');
+    msg.classList.add('warning');
+    const remain = myBudgetTotal - spent;
+    msg.textContent = `⚠ 接近預算上限（剩 NT$ ${Math.round(remain).toLocaleString()}）`;
+  } else {
+    msg.classList.add('success');
+    const remain = myBudgetTotal - spent;
+    msg.textContent = `✓ 預算內（剩 NT$ ${Math.round(remain).toLocaleString()}）`;
+  }
+
+  // 同步呼叫 updateAllProgress 讓頂部數字也更新
+  if (typeof updateAllProgress === 'function') updateAllProgress();
+}
+
+function toggleBudgetSettings() {
+  const panel = document.getElementById('budgetSettingsPanel');
+  panel.classList.toggle('show');
+  if (panel.classList.contains('show')) {
+    const input = document.getElementById('budgetTotalInput');
+    if (myBudgetTotal > 0) {
+      input.value = myBudgetTotal;
+    } else {
+      input.value = '';
+    }
+    input.focus();
+  }
+}
+
+function clearBudgetSetting() {
+  myBudgetTotal = 0;
+  saveBudgetTotal(0);
+  document.getElementById('budgetTotalInput').value = '';
+  updateBudgetStatus();
+}
+
+// ============================================================
+// PAYER SETTINGS (v9 NEW)
+// ============================================================
+function togglePayerSettings() {
+  const panel = document.getElementById('payerSettingsPanel');
+  panel.classList.toggle('show');
+  if (panel.classList.contains('show')) {
+    document.getElementById('payer1Emoji').value = customPayers.p1.emoji;
+    document.getElementById('payer1Name').value = customPayers.p1.name;
+    document.getElementById('payer2Emoji').value = customPayers.p2.emoji;
+    document.getElementById('payer2Name').value = customPayers.p2.name;
+    document.getElementById('payer3Emoji').value = customPayers.p3.emoji;
+    document.getElementById('payer3Name').value = customPayers.p3.name;
+  }
+}
+
+function updatePayerFromInputs() {
+  customPayers.p1.emoji = document.getElementById('payer1Emoji').value || '👤';
+  customPayers.p1.name = document.getElementById('payer1Name').value || '付款人 1';
+  customPayers.p2.emoji = document.getElementById('payer2Emoji').value || '👤';
+  customPayers.p2.name = document.getElementById('payer2Name').value || '付款人 2';
+  customPayers.p3.emoji = document.getElementById('payer3Emoji').value || '👥';
+  customPayers.p3.name = document.getElementById('payer3Name').value || '共付';
+  savePayers(customPayers);
+  // 重新渲染所有相關 UI
+  renderAllDaySections();
+  updatePayerSummary();
+}
+
+// ============================================================
 // RATE SETTINGS UI
 // ============================================================
 function toggleRateSettings() {
@@ -5007,7 +5496,39 @@ updateAllProgress();
 updateCountdown();
 updatePayerSummary();
 updateSheetsStats();
+updateBudgetStatus();
 fetchWeather();
+
+// 綁定預算輸入
+setTimeout(() => {
+  const budgetInput = document.getElementById('budgetTotalInput');
+  if (budgetInput && !budgetInput._bound) {
+    budgetInput._bound = true;
+    let bTimeout;
+    budgetInput.addEventListener('input', () => {
+      clearTimeout(bTimeout);
+      bTimeout = setTimeout(() => {
+        const val = parseFloat(budgetInput.value) || 0;
+        myBudgetTotal = val;
+        saveBudgetTotal(val);
+        updateBudgetStatus();
+      }, 400);
+    });
+  }
+
+  // 綁定付款人輸入
+  ['payer1Emoji', 'payer1Name', 'payer2Emoji', 'payer2Name', 'payer3Emoji', 'payer3Name'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el && !el._bound) {
+      el._bound = true;
+      let pTimeout;
+      el.addEventListener('input', () => {
+        clearTimeout(pTimeout);
+        pTimeout = setTimeout(updatePayerFromInputs, 300);
+      });
+    }
+  });
+}, 200);
 
 // 綁定匯率輸入
 setTimeout(() => {
