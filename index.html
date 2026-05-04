@@ -2388,6 +2388,283 @@ body.modal-open { overflow: hidden; }
   gap: 8px;
 }
 
+
+/* ========== DAY EXPENSE TRACKER (v10) ========== */
+.day-expense-tracker {
+  margin: 8px 16px 0;
+  padding: 14px 16px;
+  background: var(--c-bg-elev);
+  border-radius: var(--r-md);
+  border: 1px solid var(--c-line);
+  box-shadow: var(--shadow-1);
+}
+
+.day-expense-list {
+  margin-bottom: 12px;
+}
+
+.day-expense-list:empty {
+  display: none;
+}
+
+.day-expense-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 10px;
+  padding: 10px 12px;
+  background: linear-gradient(135deg, #fafaf7 0%, #f5f5f0 100%);
+  border: 1px solid var(--c-line);
+  border-radius: 10px;
+  margin-bottom: 6px;
+  align-items: center;
+}
+
+.day-expense-row-icons {
+  display: flex;
+  gap: 4px;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.day-expense-row-content {
+  min-width: 0;
+}
+
+.day-expense-row-amount-line {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.day-expense-row-amount {
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--c-gold);
+}
+
+.day-expense-row-twd {
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 10px;
+  color: var(--c-ink-faint);
+}
+
+.day-expense-row-meta {
+  font-size: 11px;
+  color: var(--c-ink-soft);
+  margin-top: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.day-expense-row-meta .spot {
+  color: var(--c-accent);
+  font-weight: 600;
+}
+
+.day-expense-row-meta .sep {
+  margin: 0 4px;
+  color: var(--c-ink-faint);
+}
+
+.day-expense-row-delete {
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  color: var(--c-ink-faint);
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.day-expense-row-delete:hover {
+  background: var(--c-danger);
+  color: white;
+}
+
+/* 折疊式新增表單 */
+.day-expense-add-toggle {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, var(--c-accent) 0%, #d96b54 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.day-expense-add-toggle:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(200, 85, 61, 0.3);
+}
+
+.day-expense-add-toggle:active {
+  transform: scale(0.98);
+}
+
+.day-expense-add-form {
+  display: none;
+  margin-top: 12px;
+  padding: 14px 16px;
+  background: linear-gradient(180deg, #f8f9fc 0%, #f0f2f8 100%);
+  border-radius: 10px;
+  border: 1px dashed var(--c-line);
+}
+
+.day-expense-add-form.show {
+  display: block;
+}
+
+.day-expense-add-form-title {
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--c-ink-faint);
+  margin-bottom: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.day-expense-add-close {
+  background: transparent;
+  border: none;
+  color: var(--c-ink-faint);
+  font-size: 16px;
+  cursor: pointer;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+}
+
+.day-expense-add-close:hover {
+  color: var(--c-danger);
+}
+
+.day-expense-currency-amount {
+  display: grid;
+  grid-template-columns: 100px 1fr;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.day-expense-twd-display {
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 11px;
+  color: var(--c-success);
+  margin-bottom: 10px;
+  font-weight: 600;
+  height: 14px;
+}
+
+.day-expense-twd-display.empty {
+  color: var(--c-ink-faint);
+  font-weight: 400;
+}
+
+.day-expense-spot-select {
+  width: 100%;
+  margin-bottom: 8px;
+  padding: 9px 12px;
+  border: 1px solid var(--c-line);
+  border-radius: 8px;
+  background: white;
+  font-family: 'Noto Serif TC', serif;
+  font-size: 13px;
+  color: var(--c-ink);
+  outline: none;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%238a8aa0' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 10px;
+  padding-right: 32px;
+}
+
+.day-expense-spot-select:focus {
+  border-color: var(--c-accent);
+  box-shadow: 0 0 0 3px rgba(200, 85, 61, 0.1);
+}
+
+.day-expense-row-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.day-expense-note-input {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid var(--c-line);
+  border-radius: 8px;
+  background: white;
+  font-family: 'Noto Serif TC', serif;
+  font-size: 13px;
+  color: var(--c-ink);
+  outline: none;
+  margin-bottom: 12px;
+}
+
+.day-expense-note-input:focus {
+  border-color: var(--c-accent);
+  box-shadow: 0 0 0 3px rgba(200, 85, 61, 0.1);
+}
+
+.day-expense-submit {
+  width: 100%;
+  padding: 11px;
+  background: var(--c-success);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.day-expense-submit:disabled {
+  background: var(--c-line);
+  color: var(--c-ink-faint);
+  cursor: not-allowed;
+}
+
+.day-expense-submit:not(:disabled):hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(82, 183, 136, 0.3);
+}
+
+.day-expense-empty {
+  padding: 14px 16px;
+  text-align: center;
+  color: var(--c-ink-faint);
+  font-size: 12px;
+  background: var(--c-line);
+  border-radius: 10px;
+  font-family: 'Helvetica Neue', sans-serif;
+  margin-bottom: 12px;
+}
+
 </style>
 </head>
 <body>
@@ -4236,6 +4513,62 @@ function renderDaySection(d) {
               <span class="day-budget-actual">NT$ ${Math.round(dayTotalTWD).toLocaleString()}</span>
             </div>
           </div>
+          <div class="day-expense-tracker" data-day-tracker="${d.day}">
+            <div class="day-expense-list" data-day-list="${d.day}"></div>
+            <button class="day-expense-add-toggle" onclick="toggleDayExpenseForm(${d.day})" id="dayExpenseToggle-${d.day}">➕ 新增一筆花費</button>
+            <div class="day-expense-add-form" id="dayExpenseForm-${d.day}">
+              <div class="day-expense-add-form-title">
+                <span>新增當日花費</span>
+                <button class="day-expense-add-close" onclick="toggleDayExpenseForm(${d.day})">✕</button>
+              </div>
+
+              <select class="day-expense-spot-select" id="dayExpenseSpot-${d.day}">
+                ${d.timeline.filter(t => t.spotId).map(t => {
+                  const spotName = t.overrideTitle || (SPOTS[t.spotId]?.title || '');
+                  return `<option value="${t.spotId}" data-time="${t.time}">${t.time} · ${spotName}</option>`;
+                }).join('')}
+                <option value="__other__">其他（自行輸入）</option>
+              </select>
+
+              <div class="day-expense-currency-amount">
+                <select class="modal-select" id="dayExpenseCurrency-${d.day}">
+                  <option value="JPY">¥ 日圓</option>
+                  <option value="TWD">NT$ 台幣</option>
+                  <option value="USD">$ 美金</option>
+                </select>
+                <div class="expense-cost-input-wrapper">
+                  <span class="expense-cost-currency-sym" id="dayExpenseSymbol-${d.day}">¥</span>
+                  <input type="number" class="expense-cost-input" id="dayExpenseAmount-${d.day}" placeholder="輸入金額" inputmode="decimal" step="any">
+                </div>
+              </div>
+
+              <div class="day-expense-twd-display empty" id="dayExpenseTwd-${d.day}">輸入金額後自動換算台幣</div>
+
+              <div class="day-expense-row-form">
+                <select class="modal-select" id="dayExpenseCategory-${d.day}">
+                  <option value="">— 分類 —</option>
+                  <option value="transport">🚆 交通</option>
+                  <option value="food">🍱 餐飲</option>
+                  <option value="ticket">🎫 門票</option>
+                  <option value="hotel">🏨 住宿</option>
+                  <option value="shopping">🛍 購物</option>
+                  <option value="cosmetics">💊 藥妝</option>
+                  <option value="souvenir">🎁 伴手禮</option>
+                  <option value="other">⚡ 雜支</option>
+                </select>
+                <select class="modal-select" id="dayExpensePayer-${d.day}">
+                  <option value="">— 付款人 —</option>
+                  <option value="p1">${customPayers.p1.emoji} ${customPayers.p1.name}</option>
+                  <option value="p2">${customPayers.p2.emoji} ${customPayers.p2.name}</option>
+                  <option value="p3">${customPayers.p3.emoji} ${customPayers.p3.name}</option>
+                </select>
+              </div>
+
+              <input type="text" class="day-expense-note-input" id="dayExpenseNote-${d.day}" placeholder="備註（如：4 人晚餐、AAA 飲料）">
+
+              <button class="day-expense-submit" id="dayExpenseSubmit-${d.day}" onclick="submitDayExpense(${d.day})" disabled>✓ 加入這筆</button>
+            </div>
+          </div>
         `;
       })()}
 
@@ -4258,6 +4591,237 @@ function renderAllDaySections() {
   const container = document.getElementById('daySectionsContainer');
   container.innerHTML = DAYS_DATA.map(d => renderDaySection(d)).join('');
   bindAllEventListeners();
+  // 渲染所有 day 的花費列表
+  DAYS_DATA.forEach(d => renderDayExpenseList(d.day));
+  // 初始化每個 day 的 form 監聽器
+  DAYS_DATA.forEach(d => initDayExpenseForm(d.day));
+}
+
+// ============================================================
+// DAY EXPENSE TRACKER (v10)
+// ============================================================
+
+function getCurrentTimeMinutes() {
+  const now = new Date();
+  return now.getHours() * 60 + now.getMinutes();
+}
+
+function timeStrToMinutes(timeStr) {
+  const m = (timeStr || '').match(/(\d+):(\d+)/);
+  if (!m) return 0;
+  return parseInt(m[1]) * 60 + parseInt(m[2]);
+}
+
+// 找出當前時間最接近的景點
+function getNearestSpot(day) {
+  const dayData = DAYS_DATA.find(x => x.day === day);
+  if (!dayData) return null;
+  const spots = dayData.timeline.filter(t => t.spotId);
+  if (spots.length === 0) return null;
+
+  const nowMin = getCurrentTimeMinutes();
+
+  // 找時間最接近且 <= 當前時間的景點
+  let best = spots[0];
+  let bestDiff = Infinity;
+  spots.forEach(s => {
+    const sMin = timeStrToMinutes(s.time);
+    const diff = Math.abs(nowMin - sMin);
+    if (diff < bestDiff) {
+      bestDiff = diff;
+      best = s;
+    }
+  });
+  return best;
+}
+
+// 渲染當日花費列表
+function renderDayExpenseList(day) {
+  const listEl = document.querySelector(`[data-day-list="${day}"]`);
+  if (!listEl) return;
+
+  const dayData = DAYS_DATA.find(x => x.day === day);
+  if (!dayData) return;
+
+  // 收集當日所有花費（依景點時間排序）
+  const allExpenses = [];
+  dayData.timeline.filter(t => t.spotId).forEach(t => {
+    const expenses = userData[t.spotId]?.expenses || [];
+    expenses.forEach(exp => {
+      allExpenses.push({
+        ...exp,
+        spotId: t.spotId,
+        spotName: t.overrideTitle || (SPOTS[t.spotId]?.title || ''),
+        time: t.time
+      });
+    });
+  });
+
+  if (allExpenses.length === 0) {
+    listEl.innerHTML = '<div class="day-expense-empty">尚未記錄任何花費</div>';
+    return;
+  }
+
+  // 依時間排序
+  allExpenses.sort((a, b) => timeStrToMinutes(a.time) - timeStrToMinutes(b.time));
+
+  let html = '';
+  allExpenses.forEach(exp => {
+    const symbol = currencySymbols[exp.currency] || '¥';
+    const twd = convertToTWD(exp.amount, exp.currency);
+    const catIcon = categoryIcons[exp.category] || '';
+    const payerIcon = getPayerIcon(exp.payer);
+    html += `
+      <div class="day-expense-row">
+        <div class="day-expense-row-icons">${catIcon}${payerIcon}</div>
+        <div class="day-expense-row-content">
+          <div class="day-expense-row-amount-line">
+            <span class="day-expense-row-amount">${symbol}${parseFloat(exp.amount).toLocaleString()}</span>
+            <span class="day-expense-row-twd">≈ NT$ ${Math.round(twd).toLocaleString()}</span>
+          </div>
+          <div class="day-expense-row-meta">
+            <span class="spot">${exp.time} · ${exp.spotName}</span>${exp.note ? `<span class="sep">·</span>${exp.note}` : ''}
+          </div>
+        </div>
+        <button class="day-expense-row-delete" data-spot="${exp.spotId}" data-exp-id="${exp.id}" title="刪除">🗑</button>
+      </div>
+    `;
+  });
+
+  listEl.innerHTML = html;
+
+  // 綁定刪除按鈕
+  listEl.querySelectorAll('.day-expense-row-delete').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const spotId = btn.dataset.spot;
+      const expId = parseFloat(btn.dataset.expId);
+      const expenses = userData[spotId]?.expenses || [];
+      const exp = expenses.find(e => e.id === expId);
+      if (!exp) return;
+      const symbol = currencySymbols[exp.currency] || '¥';
+      const noteShow = exp.note ? `（${exp.note}）` : '';
+      if (confirm(`確定刪除這筆 ${symbol}${parseFloat(exp.amount).toLocaleString()} ${noteShow} 嗎？`)) {
+        removeExpense(spotId, expId);
+        renderDayExpenseList(day);
+        renderAllDaySections();
+        if (window.cachedWeather) renderAllWeather(window.cachedWeather);
+      }
+    });
+  });
+}
+
+// 開合花費表單
+function toggleDayExpenseForm(day) {
+  const form = document.getElementById(`dayExpenseForm-${day}`);
+  const toggle = document.getElementById(`dayExpenseToggle-${day}`);
+  if (!form) return;
+
+  if (form.classList.contains('show')) {
+    form.classList.remove('show');
+    toggle.style.display = '';
+  } else {
+    form.classList.add('show');
+    toggle.style.display = 'none';
+
+    // 開啟時自動選最近景點
+    const spotSelect = document.getElementById(`dayExpenseSpot-${day}`);
+    if (spotSelect) {
+      const nearest = getNearestSpot(day);
+      if (nearest) {
+        spotSelect.value = nearest.spotId;
+      }
+    }
+
+    // Focus 到金額欄位
+    setTimeout(() => {
+      document.getElementById(`dayExpenseAmount-${day}`)?.focus();
+    }, 100);
+  }
+}
+
+// 初始化每個 day 的 form 監聽器
+function initDayExpenseForm(day) {
+  const amountEl = document.getElementById(`dayExpenseAmount-${day}`);
+  const currencyEl = document.getElementById(`dayExpenseCurrency-${day}`);
+  const symbolEl = document.getElementById(`dayExpenseSymbol-${day}`);
+  const twdEl = document.getElementById(`dayExpenseTwd-${day}`);
+  const submitEl = document.getElementById(`dayExpenseSubmit-${day}`);
+
+  if (!amountEl || !currencyEl) return;
+
+  function updateTwd() {
+    const val = amountEl.value;
+    const cur = currencyEl.value;
+    if (val && parseFloat(val) > 0) {
+      const twd = convertToTWD(val, cur);
+      twdEl.textContent = `≈ NT$ ${twd.toLocaleString(undefined, {maximumFractionDigits: 0})}`;
+      twdEl.classList.remove('empty');
+      submitEl.disabled = false;
+    } else {
+      twdEl.textContent = '輸入金額後自動換算台幣';
+      twdEl.classList.add('empty');
+      submitEl.disabled = true;
+    }
+  }
+
+  if (!amountEl._bound) {
+    amountEl._bound = true;
+    amountEl.addEventListener('input', updateTwd);
+  }
+  if (!currencyEl._bound) {
+    currencyEl._bound = true;
+    currencyEl.addEventListener('change', () => {
+      symbolEl.textContent = currencySymbols[currencyEl.value] || '¥';
+      updateTwd();
+    });
+  }
+}
+
+// 提交花費
+function submitDayExpense(day) {
+  const spotEl = document.getElementById(`dayExpenseSpot-${day}`);
+  const amountEl = document.getElementById(`dayExpenseAmount-${day}`);
+  const currencyEl = document.getElementById(`dayExpenseCurrency-${day}`);
+  const categoryEl = document.getElementById(`dayExpenseCategory-${day}`);
+  const payerEl = document.getElementById(`dayExpensePayer-${day}`);
+  const noteEl = document.getElementById(`dayExpenseNote-${day}`);
+
+  const spotId = spotEl.value;
+  const amount = amountEl.value;
+
+  if (!amount || parseFloat(amount) <= 0) {
+    alert('請輸入有效金額');
+    return;
+  }
+
+  if (!spotId || spotId === '__other__') {
+    alert('請選擇景點');
+    return;
+  }
+
+  addExpense(spotId, {
+    amount: amount,
+    currency: currencyEl.value,
+    category: categoryEl.value,
+    payer: payerEl.value,
+    note: noteEl.value.trim()
+  });
+
+  // 清空（保留景點與付款人，方便連續記）
+  amountEl.value = '';
+  noteEl.value = '';
+  categoryEl.value = '';
+  document.getElementById(`dayExpenseTwd-${day}`).textContent = '輸入金額後自動換算台幣';
+  document.getElementById(`dayExpenseTwd-${day}`).classList.add('empty');
+  document.getElementById(`dayExpenseSubmit-${day}`).disabled = true;
+
+  // 重新渲染列表
+  renderDayExpenseList(day);
+  // 重渲染整個 day 的當日總花費（更新數字）
+  renderAllDaySections();
+  if (window.cachedWeather) renderAllWeather(window.cachedWeather);
+
+  amountEl.focus();
 }
 
 // ============================================================
@@ -4566,58 +5130,6 @@ function openModal(spotId) {
           ${[1,2,3,4,5].map(n => `<span class="modal-rating-star ${rating >= n ? 'active' : ''}" data-star="${n}">★</span>`).join('')}
         </div>
       </div>
-      <div class="modal-cost">
-        <div class="modal-cost-label">實際花費紀錄</div>
-
-        <!-- 花費紀錄列表 -->
-        <div class="expense-list" id="expenseList"></div>
-
-        <!-- 新增表單 -->
-        <div class="expense-add-form">
-          <div class="expense-add-form-title">➕ 新增一筆花費</div>
-
-          <div class="expense-add-currency-amount">
-            <select class="modal-select" id="addCurrencySelect">
-              <option value="JPY">¥ 日圓</option>
-              <option value="TWD">NT$ 台幣</option>
-              <option value="USD">$ 美金</option>
-            </select>
-            <div class="expense-cost-input-wrapper">
-              <span class="expense-cost-currency-sym" id="addCurrencySymbol">¥</span>
-              <input type="number" class="expense-cost-input" id="addCostInput" placeholder="輸入金額" inputmode="decimal" step="any">
-            </div>
-          </div>
-
-          <div class="expense-add-twd-display empty" id="addTwdDisplay">輸入金額後自動換算台幣</div>
-
-          <div class="expense-add-row">
-            <select class="modal-select" id="addCategorySelect">
-              <option value="">— 分類 —</option>
-              <option value="transport">🚆 交通</option>
-              <option value="food">🍱 餐飲</option>
-              <option value="ticket">🎫 門票</option>
-              <option value="hotel">🏨 住宿</option>
-              <option value="shopping">🛍 購物</option>
-              <option value="cosmetics">💊 藥妝</option>
-              <option value="souvenir">🎁 伴手禮</option>
-              <option value="other">⚡ 雜支</option>
-            </select>
-            <select class="modal-select" id="addPayerSelect">
-              <option value="">— 付款人 —</option>
-              <option value="p1">${customPayers.p1.emoji} ${customPayers.p1.name}</option>
-              <option value="p2">${customPayers.p2.emoji} ${customPayers.p2.name}</option>
-              <option value="p3">${customPayers.p3.emoji} ${customPayers.p3.name}</option>
-            </select>
-          </div>
-
-          <input type="text" class="expense-add-note-input" id="addNoteInput" placeholder="備註（如：4 人門票、午餐）">
-
-          <button class="expense-add-button" id="addExpenseBtn" disabled>✓ 加入這筆</button>
-        </div>
-
-        ${spot.quick && spot.quick.find(q => q[1].toString().includes('¥')) ? `<div class="modal-cost-estimate" style="margin-top:8px;">${t('modal.estimate')}: ${spot.quick.find(q => q[1].toString().includes('¥'))[1]}</div>` : ''}
-      </div>
-
       <div class="modal-note">
         <div class="modal-note-label">${t('modal.note')}（景點心得）</div>
         <textarea class="modal-note-textarea" id="noteInput" placeholder="${t('modal.notePlaceholder')}">${note}</textarea>
@@ -4682,143 +5194,8 @@ function openModal(spotId) {
     });
   });
 
-  // ===== 多筆記帳系統 =====
-
-  // 渲染花費列表
-  function renderExpenseList() {
-    const expenses = getSpotExpenses(spotId);
-    const listEl = document.getElementById('expenseList');
-    if (!listEl) return;
-
-    if (expenses.length === 0) {
-      listEl.innerHTML = '<div class="expense-list-empty">尚未記錄任何花費</div>';
-      return;
-    }
-
-    let html = '';
-    expenses.forEach(exp => {
-      const symbol = currencySymbols[exp.currency] || '¥';
-      const twd = convertToTWD(exp.amount, exp.currency);
-      const catIcon = categoryIcons[exp.category] || '';
-      const payerIcon = payerIcons[exp.payer] || '';
-      const noteText = exp.note ? `· ${exp.note}` : '';
-      html += `
-        <div class="expense-row">
-          <div class="expense-row-icons">${catIcon}${payerIcon}</div>
-          <div class="expense-row-content">
-            <div>
-              <span class="expense-row-amount">${symbol}${parseFloat(exp.amount).toLocaleString()}</span>
-              <span class="expense-row-twd">≈ NT$ ${Math.round(twd).toLocaleString()}</span>
-            </div>
-            ${exp.note ? `<div class="expense-row-note">${exp.note}</div>` : ''}
-          </div>
-          <button class="expense-row-delete" data-exp-id="${exp.id}" title="刪除">🗑</button>
-        </div>
-      `;
-    });
-
-    // 小計
-    const totalJPY = getSpotTotalJPY(spotId);
-    const totalTWD = getSpotTotalTWD(spotId);
-    html += `
-      <div class="expense-list-summary">
-        <div class="expense-list-summary-label">小計（${expenses.length} 筆）</div>
-        <div>
-          <span class="expense-list-summary-amount">¥${Math.round(totalJPY).toLocaleString()}</span>
-          <span class="expense-list-summary-twd">≈ NT$ ${Math.round(totalTWD).toLocaleString()}</span>
-        </div>
-      </div>
-    `;
-
-    listEl.innerHTML = html;
-
-    // 綁定刪除按鈕
-    listEl.querySelectorAll('.expense-row-delete').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const expId = parseFloat(btn.dataset.expId);
-        const exp = expenses.find(e => e.id === expId);
-        const symbol = currencySymbols[exp?.currency] || '¥';
-        const noteShow = exp?.note ? `（${exp.note}）` : '';
-        if (confirm(`確定刪除這筆 ${symbol}${parseFloat(exp.amount).toLocaleString()} ${noteShow} 嗎？`)) {
-          removeExpense(spotId, expId);
-          renderExpenseList();
-          renderAllDaySections();
-          if (window.cachedWeather) renderAllWeather(window.cachedWeather);
-        }
-      });
-    });
-  }
-
-  renderExpenseList();
-
-  // 新增表單元件
-  const addCurrencySelect = document.getElementById('addCurrencySelect');
-  const addCostInput = document.getElementById('addCostInput');
-  const addCategorySelect = document.getElementById('addCategorySelect');
-  const addPayerSelect = document.getElementById('addPayerSelect');
-  const addNoteInput = document.getElementById('addNoteInput');
-  const addExpenseBtn = document.getElementById('addExpenseBtn');
-  const addCurrencySymbol = document.getElementById('addCurrencySymbol');
-  const addTwdDisplay = document.getElementById('addTwdDisplay');
-
-  function updateAddTwdDisplay() {
-    const val = addCostInput.value;
-    const cur = addCurrencySelect.value;
-    if (val && parseFloat(val) > 0) {
-      const twd = convertToTWD(val, cur);
-      addTwdDisplay.textContent = `≈ NT$ ${twd.toLocaleString(undefined, {maximumFractionDigits: 0})}`;
-      addTwdDisplay.classList.remove('empty');
-    } else {
-      addTwdDisplay.textContent = '輸入金額後自動換算台幣';
-      addTwdDisplay.classList.add('empty');
-    }
-  }
-
-  function updateAddBtnState() {
-    const hasAmount = addCostInput.value && parseFloat(addCostInput.value) > 0;
-    addExpenseBtn.disabled = !hasAmount;
-  }
-
-  addCurrencySelect.addEventListener('change', () => {
-    addCurrencySymbol.textContent = currencySymbols[addCurrencySelect.value] || '¥';
-    updateAddTwdDisplay();
-  });
-
-  addCostInput.addEventListener('input', () => {
-    updateAddTwdDisplay();
-    updateAddBtnState();
-  });
-
-  addExpenseBtn.addEventListener('click', () => {
-    if (!addCostInput.value || parseFloat(addCostInput.value) <= 0) {
-      alert('請輸入有效金額');
-      return;
-    }
-
-    addExpense(spotId, {
-      amount: addCostInput.value,
-      currency: addCurrencySelect.value,
-      category: addCategorySelect.value,
-      payer: addPayerSelect.value,
-      note: addNoteInput.value.trim()
-    });
-
-    // 清空表單
-    addCostInput.value = '';
-    addCategorySelect.value = '';
-    addPayerSelect.value = '';
-    addNoteInput.value = '';
-    updateAddTwdDisplay();
-    updateAddBtnState();
-
-    // 重新渲染
-    renderExpenseList();
-    renderAllDaySections();
-    if (window.cachedWeather) renderAllWeather(window.cachedWeather);
-
-    // Focus 回金額欄位、方便連續輸入
-    addCostInput.focus();
-  });
+  // ===== 多筆記帳系統移到當日總花費下方了 (v10) =====
+  // Modal 內不再處理花費紀錄
 
   const noteInput = document.getElementById('noteInput');
   let noteTimeout;
