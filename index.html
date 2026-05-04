@@ -2665,6 +2665,300 @@ body.modal-open { overflow: hidden; }
   margin-bottom: 12px;
 }
 
+
+/* ========== VISIT STATUS (v11) ========== */
+
+/* 三狀態按鈕組 */
+.visit-status-row {
+  display: flex;
+  gap: 4px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+.visit-status-btn {
+  padding: 4px 10px;
+  border: 1px solid var(--c-line);
+  background: white;
+  border-radius: 999px;
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  color: var(--c-ink-faint);
+}
+
+.visit-status-btn:hover {
+  border-color: var(--c-accent);
+}
+
+.visit-status-btn.active {
+  border-color: transparent;
+  color: white;
+  font-weight: 700;
+}
+
+.visit-status-btn.active.visited {
+  background: var(--c-success);
+}
+
+.visit-status-btn.active.skipped {
+  background: var(--c-ink-faint);
+}
+
+.visit-status-btn.active.pending {
+  background: var(--c-warning);
+}
+
+/* 已造訪：實際時間輸入 */
+.actual-time-row {
+  display: none;
+  margin-top: 6px;
+  align-items: center;
+  gap: 6px;
+}
+
+.actual-time-row.show {
+  display: flex;
+}
+
+.actual-time-label {
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 10px;
+  color: var(--c-success);
+  font-weight: 600;
+}
+
+.actual-time-input {
+  padding: 3px 8px;
+  border: 1px solid var(--c-success);
+  border-radius: 6px;
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--c-ink);
+  background: white;
+  outline: none;
+  width: 80px;
+}
+
+.actual-time-input:focus {
+  box-shadow: 0 0 0 2px rgba(82, 183, 136, 0.2);
+}
+
+.actual-time-display {
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 10px;
+  color: var(--c-success);
+  font-weight: 700;
+  background: rgba(82, 183, 136, 0.1);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+/* 跳過狀態：景點變灰 + 刪除線 */
+.timeline-item.status-skipped .event-title {
+  color: var(--c-ink-faint);
+  text-decoration: line-through;
+  text-decoration-thickness: 1.5px;
+}
+
+.timeline-item.status-skipped .event-detail,
+.timeline-item.status-skipped .event-thumb {
+  opacity: 0.5;
+}
+
+.timeline-item.status-skipped .time-col {
+  color: var(--c-ink-faint);
+}
+
+/* 已造訪狀態：景點加綠色側邊條 */
+.timeline-item.status-visited {
+  position: relative;
+}
+
+.timeline-item.status-visited::before {
+  content: '';
+  position: absolute;
+  left: -20px;
+  top: 14px;
+  bottom: 14px;
+  width: 3px;
+  background: var(--c-success);
+  border-radius: 2px;
+}
+
+/* 臨時景點區塊 */
+.custom-spots-section {
+  margin: 8px 16px 0;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, #fff8e1 0%, #fffdf3 100%);
+  border-radius: var(--r-md);
+  border: 1px dashed #f4d165;
+}
+
+.custom-spots-title {
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--c-warning);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.custom-spot-item {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 10px;
+  padding: 10px 12px;
+  background: white;
+  border-radius: 10px;
+  margin-bottom: 6px;
+  align-items: center;
+  border: 1px solid #f5e1a0;
+}
+
+.custom-spot-time {
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--c-warning);
+  flex-shrink: 0;
+}
+
+.custom-spot-content {
+  min-width: 0;
+}
+
+.custom-spot-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--c-ink);
+}
+
+.custom-spot-note {
+  font-size: 11px;
+  color: var(--c-ink-soft);
+  margin-top: 2px;
+}
+
+.custom-spot-delete {
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  color: var(--c-ink-faint);
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.custom-spot-delete:hover {
+  background: var(--c-danger);
+  color: white;
+}
+
+.custom-spot-add-toggle {
+  width: 100%;
+  padding: 10px;
+  background: linear-gradient(135deg, #f4a261 0%, #e9c46a 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 8px;
+}
+
+.custom-spot-add-toggle:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(244, 162, 97, 0.3);
+}
+
+.custom-spot-form {
+  display: none;
+  margin-top: 10px;
+  padding: 12px;
+  background: white;
+  border-radius: 10px;
+  border: 1px solid #f5e1a0;
+}
+
+.custom-spot-form.show {
+  display: block;
+}
+
+.custom-spot-form-row {
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.custom-spot-form input {
+  padding: 8px 12px;
+  border: 1px solid var(--c-line);
+  border-radius: 8px;
+  font-family: 'Noto Serif TC', serif;
+  font-size: 13px;
+  outline: none;
+  width: 100%;
+}
+
+.custom-spot-form input:focus {
+  border-color: var(--c-warning);
+  box-shadow: 0 0 0 3px rgba(244, 162, 97, 0.15);
+}
+
+.custom-spot-form-buttons {
+  display: flex;
+  gap: 6px;
+}
+
+.custom-spot-form-buttons button {
+  flex: 1;
+  padding: 9px;
+  border: none;
+  border-radius: 8px;
+  font-family: 'Helvetica Neue', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.custom-spot-submit {
+  background: var(--c-success);
+  color: white;
+}
+
+.custom-spot-cancel {
+  background: var(--c-line);
+  color: var(--c-ink);
+}
+
+.custom-spot-empty {
+  padding: 12px;
+  text-align: center;
+  font-size: 11px;
+  color: var(--c-ink-faint);
+  font-family: 'Helvetica Neue', sans-serif;
+  letter-spacing: 0.05em;
+}
+
 </style>
 </head>
 <body>
@@ -4451,8 +4745,13 @@ function renderDaySection(d) {
         ? `<div class="event-thumb" style="background-image: url('${IMAGES[item.spotId]}')"></div>`
         : `<div class="event-thumb no-image">📍</div>`;
 
+      // v11: 取得景點狀態
+      const visitStatus = userData[item.spotId]?.visitStatus || 'pending';
+      const actualTime = userData[item.spotId]?.actualTime || '';
+      const statusClass = `status-${visitStatus}`;
+
       timelineHTML += `
-        <div class="timeline-item${highlight}">
+        <div class="timeline-item${highlight} ${statusClass}">
           <div class="time-col">${item.time}${item.sub ? `<span class="time-col-sub">${item.sub}</span>` : ''}</div>
           <div class="event-col">
             <div class="event-clickable ${isCompleted ? 'completed' : ''}" data-spot="${item.spotId}">
@@ -4465,6 +4764,16 @@ function renderDaySection(d) {
                   ${expenses.length > 0 ? `<span class="event-expense-summary">實 ¥${Math.round(totalJPY).toLocaleString()}<span class="event-expense-count"> (${expenses.length}筆)</span></span>` : ''}
                   ${rating > 0 ? `<span class="event-rating-mini">${'★'.repeat(rating)}</span>` : ''}
                   ${note ? '<span class="event-has-note">📝</span>' : ''}
+                  ${visitStatus === 'visited' && actualTime ? `<span class="actual-time-display">實際 ${actualTime}</span>` : ''}
+                </div>
+                <div class="visit-status-row">
+                  <button class="visit-status-btn ${visitStatus === 'visited' ? 'active visited' : ''}" data-status-spot="${item.spotId}" data-status="visited">✅ 已造訪</button>
+                  <button class="visit-status-btn ${visitStatus === 'skipped' ? 'active skipped' : ''}" data-status-spot="${item.spotId}" data-status="skipped">⏭ 跳過</button>
+                  <button class="visit-status-btn ${visitStatus === 'pending' || !visitStatus ? 'active pending' : ''}" data-status-spot="${item.spotId}" data-status="pending">⏰ 待造訪</button>
+                </div>
+                <div class="actual-time-row ${visitStatus === 'visited' ? 'show' : ''}" data-actual-time-row="${item.spotId}">
+                  <span class="actual-time-label">實際到達：</span>
+                  <input type="time" class="actual-time-input" data-actual-time="${item.spotId}" value="${actualTime}">
                 </div>
               </div>
               ${thumbHTML}
@@ -4583,6 +4892,39 @@ function renderDaySection(d) {
       </div>
 
       <div class="timeline">${timelineHTML}</div>
+
+      ${(() => {
+        const customSpots = (userData._customSpots || {})[d.day] || [];
+        return `
+          <div class="custom-spots-section">
+            <div class="custom-spots-title">🆕 臨時加入景點</div>
+            <div class="custom-spots-list" data-custom-list="${d.day}">
+              ${customSpots.length === 0 ? `<div class="custom-spot-empty">尚未新增臨時景點</div>` : customSpots.map(cs => `
+                <div class="custom-spot-item">
+                  <div class="custom-spot-time">${cs.time || '—'}</div>
+                  <div class="custom-spot-content">
+                    <div class="custom-spot-name">${cs.name}</div>
+                    ${cs.note ? `<div class="custom-spot-note">${cs.note}</div>` : ''}
+                  </div>
+                  <button class="custom-spot-delete" data-custom-id="${cs.id}" data-custom-day="${d.day}" title="刪除">🗑</button>
+                </div>
+              `).join('')}
+            </div>
+            <button class="custom-spot-add-toggle" onclick="toggleCustomSpotForm(${d.day})" id="customSpotToggle-${d.day}">+ 新增臨時景點</button>
+            <div class="custom-spot-form" id="customSpotForm-${d.day}">
+              <div class="custom-spot-form-row">
+                <input type="time" id="customSpotTime-${d.day}" placeholder="時間">
+                <input type="text" id="customSpotName-${d.day}" placeholder="景點名稱（如：隱藏咖啡廳）">
+              </div>
+              <input type="text" id="customSpotNote-${d.day}" placeholder="備註（可選）" style="margin-bottom: 8px;">
+              <div class="custom-spot-form-buttons">
+                <button class="custom-spot-cancel" onclick="toggleCustomSpotForm(${d.day})">取消</button>
+                <button class="custom-spot-submit" onclick="submitCustomSpot(${d.day})">✓ 加入</button>
+              </div>
+            </div>
+          </div>
+        `;
+      })()}
     </section>
   `;
 }
@@ -4595,6 +4937,111 @@ function renderAllDaySections() {
   DAYS_DATA.forEach(d => renderDayExpenseList(d.day));
   // 初始化每個 day 的 form 監聽器
   DAYS_DATA.forEach(d => initDayExpenseForm(d.day));
+}
+
+// ============================================================
+// VISIT STATUS & CUSTOM SPOTS (v11)
+// ============================================================
+
+// 設定景點造訪狀態
+function setVisitStatus(spotId, status) {
+  if (!userData[spotId]) userData[spotId] = {};
+  userData[spotId].visitStatus = status;
+
+  // 如果改成「已造訪」、且還沒設實際時間，自動填當前時間
+  if (status === 'visited' && !userData[spotId].actualTime) {
+    const now = new Date();
+    const hh = String(now.getHours()).padStart(2, '0');
+    const mm = String(now.getMinutes()).padStart(2, '0');
+    userData[spotId].actualTime = `${hh}:${mm}`;
+  }
+
+  // 自動同步：已造訪 → 也勾完成
+  if (status === 'visited') {
+    userData[spotId].completed = true;
+  } else if (status === 'skipped') {
+    userData[spotId].completed = false;
+  }
+
+  saveUserData(userData);
+  updateAllProgress();
+  if (typeof updatePayerSummary === 'function') updatePayerSummary();
+  if (typeof updateSheetsStats === 'function') updateSheetsStats();
+}
+
+// 設定實際到達時間
+function setActualTime(spotId, time) {
+  if (!userData[spotId]) userData[spotId] = {};
+  userData[spotId].actualTime = time;
+  saveUserData(userData);
+}
+
+// === 臨時景點 ===
+
+function getCustomSpots(day) {
+  if (!userData._customSpots) userData._customSpots = {};
+  if (!userData._customSpots[day]) userData._customSpots[day] = [];
+  return userData._customSpots[day];
+}
+
+function addCustomSpot(day, spot) {
+  if (!userData._customSpots) userData._customSpots = {};
+  if (!userData._customSpots[day]) userData._customSpots[day] = [];
+  userData._customSpots[day].push({
+    id: Date.now() + Math.random(),
+    time: spot.time || '',
+    name: spot.name || '',
+    note: spot.note || ''
+  });
+  saveUserData(userData);
+}
+
+function removeCustomSpot(day, customId) {
+  if (!userData._customSpots?.[day]) return;
+  userData._customSpots[day] = userData._customSpots[day].filter(c => c.id !== customId);
+  saveUserData(userData);
+}
+
+function toggleCustomSpotForm(day) {
+  const form = document.getElementById(`customSpotForm-${day}`);
+  const toggle = document.getElementById(`customSpotToggle-${day}`);
+  if (!form) return;
+
+  if (form.classList.contains('show')) {
+    form.classList.remove('show');
+    toggle.style.display = '';
+  } else {
+    form.classList.add('show');
+    toggle.style.display = 'none';
+    // 預設填當前時間
+    const timeEl = document.getElementById(`customSpotTime-${day}`);
+    if (timeEl && !timeEl.value) {
+      const now = new Date();
+      timeEl.value = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+    }
+    setTimeout(() => document.getElementById(`customSpotName-${day}`)?.focus(), 100);
+  }
+}
+
+function submitCustomSpot(day) {
+  const time = document.getElementById(`customSpotTime-${day}`).value;
+  const name = document.getElementById(`customSpotName-${day}`).value.trim();
+  const note = document.getElementById(`customSpotNote-${day}`).value.trim();
+
+  if (!name) {
+    alert('請輸入景點名稱');
+    return;
+  }
+
+  addCustomSpot(day, { time, name, note });
+
+  // 清空表單
+  document.getElementById(`customSpotName-${day}`).value = '';
+  document.getElementById(`customSpotNote-${day}`).value = '';
+  // 不清空時間，方便連續加入同時段景點
+
+  // 重新渲染
+  renderAllDaySections();
 }
 
 // ============================================================
@@ -4925,7 +5372,6 @@ function bindAllEventListeners() {
       const spotId = cb.dataset.checkbox;
       const current = userData[spotId]?.completed;
       setSpotData(spotId, 'completed', !current);
-      // Reset day maps so they re-render with updated states
       Object.keys(dayMaps).forEach(d => {
         if (dayMaps[d]) { dayMaps[d].remove(); delete dayMaps[d]; }
       });
@@ -4938,9 +5384,51 @@ function bindAllEventListeners() {
 
   document.querySelectorAll('.event-clickable').forEach(el => {
     el.addEventListener('click', e => {
+      // 點到 status 按鈕、actual-time 輸入、checkbox 都不要開 Modal
       if (e.target.closest('[data-checkbox]')) return;
+      if (e.target.closest('[data-status-spot]')) return;
+      if (e.target.closest('[data-actual-time]')) return;
+      if (e.target.closest('[data-actual-time-row]')) return;
       const spotId = el.dataset.spot;
       if (spotId && SPOTS[spotId]) openModal(spotId);
+    });
+  });
+
+  // v11: 三狀態按鈕
+  document.querySelectorAll('[data-status-spot]').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const spotId = btn.dataset.statusSpot;
+      const status = btn.dataset.status;
+      setVisitStatus(spotId, status);
+      renderAllDaySections();
+      if (window.cachedWeather) renderAllWeather(window.cachedWeather);
+    });
+  });
+
+  // v11: 實際時間輸入
+  document.querySelectorAll('[data-actual-time]').forEach(input => {
+    input.addEventListener('click', e => e.stopPropagation());
+    input.addEventListener('change', () => {
+      const spotId = input.dataset.actualTime;
+      setActualTime(spotId, input.value);
+      renderAllDaySections();
+    });
+  });
+
+  // v11: 臨時景點刪除
+  document.querySelectorAll('[data-custom-id]').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const customId = parseFloat(btn.dataset.customId);
+      const day = parseInt(btn.dataset.customDay);
+      const customSpots = getCustomSpots(day);
+      const cs = customSpots.find(c => c.id === customId);
+      if (!cs) return;
+      if (confirm(`確定刪除「${cs.name}」嗎？`)) {
+        removeCustomSpot(day, customId);
+        renderAllDaySections();
+      }
     });
   });
 }
@@ -5548,7 +6036,7 @@ function generateExpensesCSV() {
 // 產生「景點進度」CSV
 function generateProgressCSV() {
   const rows = [
-    ['日', '時間', '景點名稱', '預估 (NT$)', '完成', '評分', '備註']
+    ['日', '計畫時間', '實際時間', '景點名稱', '狀態', '預估 (NT$)', '完成', '評分', '備註', '類型']
   ];
 
   DAYS_DATA.forEach(d => {
@@ -5559,8 +6047,10 @@ function generateProgressCSV() {
       const rating = sd.rating || '';
       const note = sd.note || '';
       const spotName = item.overrideTitle || SPOTS[item.spotId]?.title || item.spotId;
+      const visitStatus = sd.visitStatus || 'pending';
+      const actualTime = sd.actualTime || '';
+      const statusText = { visited: '已造訪', skipped: '跳過', pending: '待造訪' }[visitStatus];
 
-      // 估算當筆台幣（從 cost 提取數字 * 0.21）
       let estTwd = 0;
       if (item.cost) {
         const match = item.cost.match(/[\d,]+/);
@@ -5573,11 +6063,31 @@ function generateProgressCSV() {
       rows.push([
         d.day,
         item.time || '',
+        actualTime,
         spotName,
+        statusText,
         estTwd,
         completed,
         rating,
-        note
+        note,
+        '建議'
+      ]);
+    });
+
+    // 加上臨時景點
+    const customSpots = (userData._customSpots || {})[d.day] || [];
+    customSpots.forEach(cs => {
+      rows.push([
+        d.day,
+        '',
+        cs.time || '',
+        cs.name,
+        '已造訪',
+        '',
+        '☑',
+        '',
+        cs.note || '',
+        '臨時'
       ]);
     });
   });
